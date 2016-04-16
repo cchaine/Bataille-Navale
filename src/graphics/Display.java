@@ -60,7 +60,7 @@ public class Display {
 			UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 		}catch(Exception e)
 		{
-			System.out.println("Error loading look & feel : " + e); //Imprime l'erreur
+			e.printStackTrace(); //Imprime l'erreur
 		}
 		
 		splashScreen.setSize(width / 2, height / 2); //Défini la taille du splashScreen

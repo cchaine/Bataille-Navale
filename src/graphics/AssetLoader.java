@@ -1,14 +1,20 @@
 package graphics;
 
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import javax.swing.JProgressBar;
 
 import sun.applet.Main;
+
+/**
+ * @file src/graphics/AssetLoader.java
+ * @author cchaine
+ *
+ * @brief Classe de stockage des ressources
+ * @details Charge et stocke les ressources en static, pour un acces rapide
+ * sans recharger des ressources plusieurs fois
+ */
 
 public class AssetLoader {
 	
@@ -46,9 +52,17 @@ public class AssetLoader {
 	public static BufferedImage randomButtonHovered;
 	public static BufferedImage randomButtonPressed;
 	
+	/**
+	 * @brief Chargement de toutes les ressources necessaires
+	 * @detail Chargement des images et polices necessaires pour éviter les 
+	 * ralentissement. Les ressources sont donc accessible statiquement
+	 * 
+	 * @param progressBar	Barre de progression du splashscreen
+	 */
+	
 	public static void loadAssets(JProgressBar progressBar) {
 		boat = ImageLoader.loadImage("/textures/military.png");
-		progressBar.setValue(progressBar.getValue() + 2);
+		progressBar.setValue(progressBar.getValue() + 2); //Incrémentation de la barre de progression de 2
 		waves = ImageLoader.loadImage("/textures/waves.png");
 		progressBar.setValue(progressBar.getValue() + 2);
 		grid = ImageLoader.loadImage("/textures/fullGrid.png");
@@ -86,17 +100,11 @@ public class AssetLoader {
 		water = ImageLoader.loadImage("/textures/water2.png");
 		progressBar.setValue(progressBar.getValue() + 2);
 		
+		//Création d'une police si 
 		try {
 			junebug = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/fonts/junebug.ttf"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FontFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace(); //Impression de l'erreur
 		}
 		progressBar.setValue(progressBar.getValue() + 2);
 		
@@ -125,8 +133,6 @@ public class AssetLoader {
 		progressBar.setValue(progressBar.getValue() + 2);
 		randomButtonPressed = ImageLoader.loadImage("/textures/rdmButtonPressed.png");
 		progressBar.setValue(progressBar.getValue() + 2);
-		
-		progressBar.setValue(100);
 	}
 
 }
