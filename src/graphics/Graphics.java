@@ -26,7 +26,7 @@ public class Graphics{
 	 * @param title		Intitulé de la fenêtre
 	 * @param width		Longueur de la fenêtre
 	 * @param height	Largeur de la fenêtre
-	 * @param stateManager		Gestionnaire des étapes du programme
+	 * @param stateManager	Gestionnaire des étapes du programme
 	 */
 	public Graphics(String title, int width, int height, StateManager stateManager)
 	{
