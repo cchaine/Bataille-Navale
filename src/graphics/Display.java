@@ -136,9 +136,6 @@ public class Display {
 		frame.addKeyListener(key);
 	}
 	
-	/**
-	 * @return canvas	La surface de dessin
-	 */
 	public Canvas getCanvas()
 	{
 		return canvas;

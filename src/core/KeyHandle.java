@@ -43,7 +43,6 @@ public class KeyHandle implements KeyListener{
 	@Override
 	public void keyReleased(KeyEvent e) {
 		stateManager.getCurrentState().keyReleased(e);
-		
 	}
 
 	/**
@@ -52,8 +51,6 @@ public class KeyHandle implements KeyListener{
 	 * dont la touche est utilisée
 	 */
 	@Override
-	public void keyTyped(KeyEvent e) {
-		
-	}
+	public void keyTyped(KeyEvent e) {}
 
 }

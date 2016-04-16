@@ -53,26 +53,18 @@ public class MouseHandle implements MouseListener{
 	 * d'interaction
 	 */
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 	/**
 	 * @brief Non utilisé mais necessité d'implémenter
 	 */
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseEntered(MouseEvent e) {}
 
 	/**
 	 * @brief Non utilisé mais necessité d'implémenter
 	 */
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseExited(MouseEvent e) {}
 
 }

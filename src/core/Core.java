@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import graphics.Graphics;
 import state.StateManager;
 
+/**
+ * @file src/Core.java
+ * @author cchaine
+ *
+ */
 public class Core implements Runnable{
 
 	private boolean running = false;
