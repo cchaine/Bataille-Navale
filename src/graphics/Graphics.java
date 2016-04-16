@@ -1,13 +1,11 @@
 package graphics;
 
 import java.awt.image.BufferStrategy;
-
 import state.StateManager;
 
 public class Graphics{
 
 	private Display display;
-	public static int width, height;
 	
 	private BufferStrategy bufferStrategy;
 	private java.awt.Graphics g;
@@ -24,18 +22,9 @@ public class Graphics{
 		key = new KeyHandle(stateManager);
 		
 		display = new Display(title, width, height);
-		while(display.getProgressBar().getValue() != 100)
-		{
-			AssetLoader.loadAssets(display);
-		}
-		
 		display.createDisplay();
-		display.loading().dispose();
-		display.getCanvas().addMouseListener(mouse);
-		display.getFrame().addKeyListener(key);
-		
-		this.width = width;
-		this.height = height;
+		display.addMouseListener(mouse);
+		display.addKeyListener(key);
 	}
 	
 	public void update()
@@ -53,7 +42,7 @@ public class Graphics{
 		}
 		
 		g = bufferStrategy.getDrawGraphics();
-		g.clearRect(0, 0, width, height);
+		g.clearRect(0, 0, Display.width, Display.height);
 		
 		stateManager.getCurrentState().render(g);
 		

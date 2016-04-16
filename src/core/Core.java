@@ -22,20 +22,6 @@ public class Core implements Runnable{
 	private void init()
 	{
 		players = new ArrayList<>();
-		/*ArrayList<Boat> boats1 = new ArrayList<>();
-		boats1.add(new Boat(BoatType.PORTEAVION, "B3", 1));
-		boats1.add(new Boat(BoatType.CROISEUR, "A4", 1));
-		boats1.add(new Boat(BoatType.CONTRETORPILLEUR, "E5", 1));
-		boats1.add(new Boat(BoatType.SOUSMARIN, "G1", 1));
-		boats1.add(new Boat(BoatType.TORPILLEUR, "J10", 3));
-		ArrayList<Boat> boats2 = new ArrayList<>();
-		boats2.add(new Boat(BoatType.PORTEAVION, "B3", 1));
-		boats2.add(new Boat(BoatType.CROISEUR, "A4", 1));
-		boats2.add(new Boat(BoatType.CONTRETORPILLEUR, "E5", 1));
-		boats2.add(new Boat(BoatType.SOUSMARIN, "G1", 1));
-		boats2.add(new Boat(BoatType.TORPILLEUR, "J10", 3));
-		players.add(new Player("PlayerOne", boats1));
-		players.add(new Player("PlayerTwo", boats2));*/
 		stateManager = new StateManager(this);
 		graphics = new Graphics("Bataille Navalle", 1200, 600, stateManager);
 		timer = new Timer();
