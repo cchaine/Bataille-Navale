@@ -50,24 +50,24 @@ public class Core implements Runnable{
 		init();
 		
 		float ellapsedTime;
-        float accumulator = 0f;
-        float interval = 1f / TARGET_UPS;
+		float accumulator = 0f;
+		float interval = 1f / TARGET_UPS;
 
-        boolean running = true;
-        while (running) {
-            ellapsedTime = timer.getEllapsedTime(); //Récupère le temps depuis la dernière mise à jour
-            accumulator += ellapsedTime; //L'ajoute à l'accumulateur
+		boolean running = true;
+		while (running) {
+			ellapsedTime = timer.getEllapsedTime(); //Récupère le temps depuis la dernière mise à jour
+			accumulator += ellapsedTime; //L'ajoute à l'accumulateur
 
-            //Tant que le programme est en retard, mettre à jour la logique sans faire de rendu
-            while (accumulator >= interval) {
-                update();
-                accumulator -= interval;
-            }
+			//Tant que le programme est en retard, mettre à jour la logique sans faire de rendu
+			while (accumulator >= interval) {
+				update();
+				accumulator -= interval;
+			}
 
-            render(); //Si le programme à le temps, faire le rendu
+			render(); //Si le programme à le temps, faire le rendu
 
-            sync();
-        }
+			sync();
+		}
 		
 		stop();
 	}
@@ -78,17 +78,17 @@ public class Core implements Runnable{
 	 * programme soit à l'heure pour recommencer la boucle.
 	 */
 	private void sync() {
-        float loopSlot = 1f / TARGET_FPS; //Le temps supposé de la boucle avec rendu
-        double endTime = timer.getLastLoopTime() + loopSlot; //Le temps supposé après un passage de boucle
-        
-        //Tant que le programme est en avance, mettre le thread en pause
-        while (timer.getTime() < endTime) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ie) {
-            }
-        }
-    }
+		float loopSlot = 1f / TARGET_FPS; //Le temps supposé de la boucle avec rendu
+		double endTime = timer.getLastLoopTime() + loopSlot; //Le temps supposé après un passage de boucle
+
+		//Tant que le programme est en avance, mettre le thread en pause
+		while (timer.getTime() < endTime) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException ie) {
+			}
+		}
+	}
 	
 	/**
 	 * @brief Informe la classe Graphics qu'il faut mettre à jour la logique
