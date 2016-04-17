@@ -1,68 +1,70 @@
 package graphics;
 
 import java.awt.image.BufferStrategy;
-
 import state.StateManager;
 
+/**
+ * @file src/graphics/Graphics.java
+ * @author cchaine
+ *
+ * @brief Classe maîtresse du graphisme
+ * @detail Cette classe gère tout le graphisme, de la création de la fenêtre
+ * au rendu
+ */
 public class Graphics{
 
-	private Display display;
-	public static int width, height;
-	
 	private BufferStrategy bufferStrategy;
 	private java.awt.Graphics g;
 	
-	private MouseHandle mouse;
-	private KeyHandle key;
-	
 	private StateManager stateManager;
 	
+	/**
+	 * @brief Contructeur
+	 * @detail Création de la fenêtre et récupération des éléments pour le 
+	 * rendu (dessin)
+	 * 
+	 * @param title		Intitulé de la fenêtre
+	 * @param width		Longueur de la fenêtre
+	 * @param height	Largeur de la fenêtre
+	 * @param stateManager	Gestionnaire des étapes du programme
+	 */
 	public Graphics(String title, int width, int height, StateManager stateManager)
 	{
 		this.stateManager = stateManager;
-		mouse = new MouseHandle(stateManager);
-		key = new KeyHandle(stateManager);
 		
-		display = new Display(title, width, height);
-		while(display.getProgressBar().getValue() != 100)
-		{
-			AssetLoader.loadAssets(display);
-		}
-		
+		Display display = new Display(title, width, height);
 		display.createDisplay();
-		display.loading().dispose();
-		display.getCanvas().addMouseListener(mouse);
-		display.getFrame().addKeyListener(key);
+		display.addMouseListener(new MouseHandle(stateManager)); //Ajout d'un gestionnaire de souris
+		display.addKeyListener(new KeyHandle(stateManager)); //Ajout d'un gestionnaire de clavier
 		
-		this.width = width;
-		this.height = height;
+		//Création des outils pour le rendu
+		display.getCanvas().createBufferStrategy(3);
+		bufferStrategy = display.getCanvas().getBufferStrategy();
 	}
 	
+	/**
+	 * @brief Met à jour la logique du jeu
+	 * @details Envoi au gestionnaire des étapes l'ordre de mise à jour de la logique du jeu
+	 */
 	public void update()
 	{
 		stateManager.getCurrentState().update();
 	}
 	
+	/**
+	 * @brief Met à jour le graphisme du jeu
+	 * @details Récupération des outils pour le rendu et envoi l'odre au 
+	 * gestionnaire des étapes de mettre à jour le graphisme
+	 */
 	public void render()
 	{
-		bufferStrategy = display.getCanvas().getBufferStrategy();
-		if(bufferStrategy == null)
-		{
-			display.getCanvas().createBufferStrategy(3);
-			return;
-		}
+		g = bufferStrategy.getDrawGraphics(); //Récupère l'objet permettant de dessiner
 		
-		g = bufferStrategy.getDrawGraphics();
-		g.clearRect(0, 0, width, height);
+		g.clearRect(0, 0, Display.width, Display.height); //Efface l'image précédente pour dessiner la nouvelle
 		
 		stateManager.getCurrentState().render(g);
 		
-		bufferStrategy.show();
+		bufferStrategy.show(); //Affiche le dessin
 		g.dispose();
-	}
-	
-	public Display getDisplay()
-	{
-		return display;
 	}
 }

@@ -1,5 +1,11 @@
 package core;
 
+/**
+ * @file src/core/BoatType.java
+ * @author cchaine
+ *
+ * @brief Défini les types de bateaux et leur taille
+ */
 public enum BoatType {
 	
 	PORTEAVION(5),
@@ -10,6 +16,10 @@ public enum BoatType {
 	
 	private int size;
 	
+	/**
+	 * @brief Constructeur privé
+	 * @param size		Taille du bateau
+	 */
 	private BoatType(int size)
 	{
 		this.size = size;

@@ -353,7 +353,7 @@ public class PlayState extends State {
 	public void mouseReleased(MouseEvent e) {
 		if (x > 551 && x < 650 && y > 123 && y < 224 && fired) {
 			if (opponentPlayer.getBoats().size() == 0) {
-				currentPlayer.setWon(true);
+				currentPlayer.setWinner(true);
 				stateManager.setCurrentState(new EndGameState(stateManager, currentPlayer));
 			} else if (stateManager.getMultiplayer()) {
 				stateManager.setCurrentPlayer(1);
