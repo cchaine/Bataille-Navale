@@ -4,7 +4,13 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-
+/**
+ * @file src/state/State.java
+ * @author cchaine
+ *
+ * @brief Classe abstraite "Etat", pour l'implémentation du gestionnaire des 
+ * étapes du jeu
+ */
 public abstract class State {
 
 	public abstract void update();

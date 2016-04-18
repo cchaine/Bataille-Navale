@@ -15,6 +15,10 @@ public class StateManager {
 	public StateManager(Core core)
 	{
 		this.core = core;
+	}
+	
+	public void init()
+	{
 		currentState = new MenuState(this);
 	}
 	

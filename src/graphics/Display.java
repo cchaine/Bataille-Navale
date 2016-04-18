@@ -4,6 +4,7 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
+import utils.AssetLoader;
 
 import javax.swing.JFrame;
 import javax.swing.JProgressBar;
@@ -40,8 +41,8 @@ public class Display {
 	public Display(String title, int width, int height)
 	{
 		this.title = title;
-		Display.width = width;
-		Display.height = height;
+		this.width = width;
+		this.height = height;
 		
 		loadResources();
 	}

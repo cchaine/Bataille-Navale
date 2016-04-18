@@ -12,7 +12,7 @@ import java.awt.geom.Rectangle2D;
 import core.Boat;
 import core.Computer;
 import core.Player;
-import graphics.AssetLoader;
+import utils.AssetLoader;
 import graphics.Display;
 
 public class PlayState extends State {

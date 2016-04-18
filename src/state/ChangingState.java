@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import graphics.AssetLoader;
+import utils.AssetLoader;
 import graphics.Display;
 
 public class ChangingState extends State{

@@ -1,21 +1,22 @@
 package state;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import com.sun.javafx.geom.AreaOp.NZWindOp;
+import com.sun.glass.ui.Window;
 
 import core.Boat;
 import core.BoatType;
 import core.Computer;
 import core.Player;
-import graphics.AssetLoader;
+import utils.AssetLoader;
 import graphics.Display;
+import gui.TextButton;
+import javafx.scene.control.Button;
 
 public class StartingState extends State {
 
@@ -39,7 +40,6 @@ public class StartingState extends State {
 	private boolean trashPressed = false;
 	private boolean trashClicked = false;
 	private boolean randomPressed = false;
-	private boolean randomClicked= false;
 
 	private boolean continuePressed = false;
 

@@ -1,4 +1,4 @@
-package core;
+package utils;
 
 /**
  * @file src/core/Timer.java

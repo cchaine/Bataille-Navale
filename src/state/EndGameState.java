@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import core.Boat;
 import core.Player;
-import graphics.AssetLoader;
+import utils.AssetLoader;
 import graphics.Display;
 import sun.applet.Main;
 

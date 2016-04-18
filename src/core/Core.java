@@ -37,6 +37,8 @@ public class Core implements Runnable{
 		
 		timer = new Timer();
 		timer.init();
+		
+		stateManager.init(); //Créé le premier état de jeu
 	}
 	
 	/**
