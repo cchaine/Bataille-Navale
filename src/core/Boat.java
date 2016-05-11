@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * @file src/core/Boat.java
- * @author cchaine
+ * @author alexBrousse
  *
  * @brief Classe Maîtresse Bateau
  * @details Stocke les informations du bateau et fourni des méthodes 
