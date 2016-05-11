@@ -386,7 +386,7 @@ public class Computer extends Player {
 				}
 			}
 		} while (!fired);
-		stateManager.setCurrentPlayer(0);
+		//stateManager.setCurrentPlayer(0);
 	}
 
 	public static boolean isOnCase(Boat boatBuffer, ArrayList<Boat> boat) {

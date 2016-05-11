@@ -3,11 +3,13 @@ package state;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import com.sun.glass.ui.Window;
+import javax.media.jai.operator.RenderableDescriptor;
 
 import core.Boat;
 import core.BoatType;
@@ -15,33 +17,33 @@ import core.Computer;
 import core.Player;
 import utils.AssetLoader;
 import graphics.Display;
+import gui.BoatButton;
+import gui.Button;
 import gui.TextButton;
-import javafx.scene.control.Button;
+import gui.TextField;
+import gui.TriStateButton;
 
 public class StartingState extends State {
 
 	private StateManager stateManager;
-	private int porteAvion = 0;
-	private int croiseur = 0;
-	private int contreTorpilleur = 0;
-	private int sousMarin = 0;
-	private int torpilleur = 0;
-	private boolean name = false;
-	private boolean namefirst = true;
-	private int direction = 1;
-	private float disparitionErreur = 1;
 
-	private String currentName;
+	private BoatButton porteAvion;
+	private BoatButton croiseur;
+	private BoatButton contreTorpilleur;
+	private BoatButton sousMarin;
+	private BoatButton torpilleur;
+
+	private TextField nameField;
+
+	private Button randomButton;
+	private TriStateButton trashButton;
+
 	private String errorMessage;
+	private float errorTimeEvolution = 1;
 
-	private Color boatColor;
-	private Color boatSelectedColor;
-	private Color boatGrayedColor;
-	private boolean trashPressed = false;
-	private boolean trashClicked = false;
-	private boolean randomPressed = false;
+	private Button continueButton;
 
-	private boolean continuePressed = false;
+	private int direction = 1;
 
 	private int mouseX, mouseY;
 
@@ -49,96 +51,140 @@ public class StartingState extends State {
 
 	public StartingState(StateManager stateManager) {
 		this.stateManager = stateManager;
-		
-		currentName = "Entrez votre nom...";
+
+		porteAvion = new BoatButton(320, 213, BoatType.PORTEAVION);
+		croiseur = new BoatButton(320, 260, BoatType.CROISEUR);
+		contreTorpilleur = new BoatButton(320, 307, BoatType.CONTRETORPILLEUR);
+		sousMarin = new BoatButton(320, 354, BoatType.SOUSMARIN);
+		torpilleur = new BoatButton(320, 401, BoatType.TORPILLEUR);
+
+		nameField = new TextField(48, 72, 515, 114);
+
+		randomButton = new Button(1145, 518, 60, 60, AssetLoader.randomButton, AssetLoader.randomButtonHovered,
+				AssetLoader.randomButtonPressed);
+		trashButton = new TriStateButton(555, 518, 70, 70, AssetLoader.trash, AssetLoader.trashClickedImg,
+				AssetLoader.trashPressedImg);
+
+		continueButton = new Button(1145, 90, 60, 60, AssetLoader.continueButton, AssetLoader.continueButtonHovered,
+				AssetLoader.continueButtonPressed);
+
 		errorMessage = "";
-		boatColor = new Color(0, 35, 102, 255);
-		boatSelectedColor = new Color(100, 135, 202, 255);
-		boatGrayedColor = new Color(150, 185, 252, 255);
 	}
 
 	@Override
 	public void update() {
+		mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
+		mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
+
+		porteAvion.update(mouseX, mouseY);
+		croiseur.update(mouseX, mouseY);
+		contreTorpilleur.update(mouseX, mouseY);
+		sousMarin.update(mouseX, mouseY);
+		torpilleur.update(mouseX, mouseY);
+
+		randomButton.update(mouseX, mouseY);
+		continueButton.update(mouseX, mouseY);
+
+		if (nameField.contains(mouseX, mouseY))
+			nameField.setHovered(true);
+		else
+			nameField.setHovered(false);
+
 		if (!errorMessage.isEmpty()) {
-			disparitionErreur += 0.02;
-			if (disparitionErreur >= 3) {
-				disparitionErreur = 1;
+			errorTimeEvolution += 0.02;
+			if (errorTimeEvolution >= 3) {
+				errorTimeEvolution = 1;
 				errorMessage = "";
 			}
 		}
-
-		mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
-		mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
 	}
 
 	@Override
 	public void render(Graphics g) {
+		porteAvion.render(g);
+		croiseur.render(g);
+		contreTorpilleur.render(g);
+		sousMarin.render(g);
+		torpilleur.render(g);
 
-		g.setFont(AssetLoader.helvetica45);
-		if (name) {
-			g.setColor(Color.LIGHT_GRAY);
-		} else {
-			g.setColor(Color.GRAY);
-		}
-		g.drawRect(48, 72, 515, 114);
-		if (name) {
-			g.setColor(Color.DARK_GRAY);
-		} else {
-			g.setColor(Color.GRAY);
-		}
-		g.drawString(currentName, 50, 150);
+		nameField.render(g);
 
-		if (porteAvion == 1) {
-			g.setColor(boatSelectedColor);
-		} else if (porteAvion == 2) {
-			g.setColor(boatGrayedColor);
-		} else {
-			g.setColor(boatColor);
-		}
-		g.fillRect(320, 213, 220, 40);
-		g.setFont(AssetLoader.helvetica25);
-		g.drawString("PORTE-AVION", 130, 241);
+		randomButton.render(g);
 
-		if (croiseur == 1) {
-			g.setColor(boatSelectedColor);
-		} else if (croiseur == 2) {
-			g.setColor(boatGrayedColor);
-		} else {
-			g.setColor(boatColor);
+		if (!boats.isEmpty()) {
+			trashButton.render(g);
 		}
-		g.fillRect(320, 260, 176, 40);
-		g.drawString("CROISSEUR", 155, 288);
 
-		if (contreTorpilleur == 1) {
-			g.setColor(boatSelectedColor);
-		} else if (contreTorpilleur == 2) {
-			g.setColor(boatGrayedColor);
-		} else {
-			g.setColor(boatColor);
+		if (!errorMessage.isEmpty()) {
+			g.setColor(new Color(252, 67, 73, (int) (255 / errorTimeEvolution)));
+			g.setFont(AssetLoader.errorFont);
+			g.drawString(errorMessage, 525, 25);
 		}
-		g.fillRect(320, 307, 132, 40);
-		g.drawString("CONTRE-TORPILLEUR", 33, 335);
 
-		if (sousMarin == 1) {
-			g.setColor(boatSelectedColor);
-		} else if (sousMarin == 2) {
-			g.setColor(boatGrayedColor);
-		} else {
-			g.setColor(boatColor);
+		drawGrid(g);
+
+		for (int i = 0; i < boats.size(); i++) {
+			g.translate(600, 42);
+
+			if (trashButton.isActive())
+				g.setColor(new Color(232, 47, 53, 240));
+			else
+				g.setColor(new Color(0, 35, 102, 240));
+
+			Boat boat = boats.get(i);
+
+			String firstCase = boat.getCases().get(0);
+			String lastCase = boat.getCases().get(boat.getCases().size() - 1);
+			int boatDirection = boats.get(i).getDirection();
+			Rectangle2D boatBounds = null;
+
+			switch (boatDirection) {
+			case 1:
+				boatBounds = new Rectangle((firstCase.charAt(0) - 64) * 45 + 605,
+						66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45),
+						81 + (boat.getType().getSize() - 2) * 45, 36);
+				break;
+
+			case 2:
+				boatBounds = new Rectangle(5 + ((firstCase.charAt(0) - 64) * 45) + 600,
+						67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45), 37,
+						81 + (boat.getType().getSize() - 2) * 45);
+				break;
+
+			case 3:
+				boatBounds = new Rectangle((5 + ((lastCase.charAt(0) - 64) * 45)) + 600,
+						66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45)),
+						81 + (boat.getType().getSize() - 2) * 45, 36);
+				break;
+
+			case 4:
+				boatBounds = new Rectangle(5 + ((lastCase.charAt(0) - 64) * 45) + 600,
+						67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45), 37,
+						81 + (boat.getType().getSize() - 2) * 45);
+				break;
+			}
+
+			if (trashButton.isActive() && boatBounds.contains(mouseX, mouseY))
+				g.setColor(new Color(255, 87, 93));
+
+			g.fillRect((int) (boatBounds.getX() - 600), (int) (boatBounds.getY() - 66), (int) boatBounds.getWidth(),
+					(int) boatBounds.getHeight());
+
+			if (trashButton.isActive())
+				g.drawImage(AssetLoader.delete, (int) (boatBounds.getX() - 600 + boatBounds.getWidth() / 2 - 15),
+						(int) (boatBounds.getY() - 66 + boatBounds.getHeight() / 2 - 15), 30, 30, null);
+
+			g.translate(-600, -42);
 		}
-		g.fillRect(320, 354, 132, 40);
-		g.drawString("SOUS-MARIN", 145, 382);
 
-		if (torpilleur == 1) {
-			g.setColor(boatSelectedColor);
-		} else if (torpilleur == 2) {
-			g.setColor(boatGrayedColor);
-		} else {
-			g.setColor(boatColor);
+		if (boats.size() == 5) {
+			continueButton.render(g);
 		}
-		g.fillRect(320, 401, 88, 40);
-		g.drawString("TORPILLEUR", 145, 429);
 
+		this.mouseRender(g);
+	}
+
+	private void drawGrid(Graphics g) {
 		g.drawImage(AssetLoader.grid, 600, 42, null);
 		g.setFont(AssetLoader.helvetica35);
 		g.setColor(new Color(0x333333, false));
@@ -163,132 +209,21 @@ public class StartingState extends State {
 		g.drawString("8", 612, 437);
 		g.drawString("9", 612, 482);
 		g.drawString("10", 602, 527);
-
-		if (!errorMessage.isEmpty()) {
-			g.setColor(new Color(252, 67, 73, (int) (255 / disparitionErreur)));
-			g.setFont(AssetLoader.errorFont);
-			g.drawString(errorMessage, 525, 25);
-		}
-
-		for (int i = 0; i < boats.size(); i++) {
-			g.translate(600, 42);
-			if (trashClicked) {
-				g.setColor(new Color(232, 47, 53, 240));
-			} else {
-				g.setColor(new Color(0, 35, 102, 240));
-			}
-
-			Boat boat = boats.get(i);
-
-			String firstCase = boat.getCases().get(0);
-			String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-
-			int boatDirection = boats.get(i).getDirection();
-
-			if (boatDirection == 1) {
-				if (trashClicked && mouseX > (5 + ((firstCase.charAt(0) - 64) * 45)) + 600
-						&& mouseX < 600
-								+ (5 + ((firstCase.charAt(0) - 64) * 45) + 81 + (boat.getType().getSize() - 2) * 45)
-						&& mouseY > 66 + (5 + (Integer.parseInt(firstCase.substring(1)) * 45))
-						&& mouseY < 67 + (5 + 36 + (Integer.parseInt(firstCase.substring(1)) * 45)))
-					g.setColor(new Color(255, 87, 93));
-				g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(firstCase.substring(1)) * 45),
-						81 + (boat.getType().getSize() - 2) * 45, 36);
-				if (trashClicked)
-					g.drawImage(AssetLoader.delete,
-							5 + ((firstCase.charAt(0) - 64) * 45) + (81 + (boat.getType().getSize() - 2) * 45) / 2 - 15,
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 18 - 15, 30, 30, null);
-			} else if (boatDirection == 2) {
-				if (trashClicked && mouseX > 5 + ((firstCase.charAt(0) - 64) * 45) + 600
-						&& mouseX < 600 + 5 + ((firstCase.charAt(0) - 64) * 45) + 37
-						&& mouseY > 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45)
-						&& mouseY < 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 81
-								+ (boat.getType().getSize() - 2) * 45)
-					g.setColor(new Color(255, 87, 93));
-				g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(firstCase.substring(1)) * 45),
-						36, 81 + (boat.getType().getSize() - 2) * 45);
-				if (trashClicked)
-					g.drawImage(AssetLoader.delete, 5 + ((firstCase.charAt(0) - 64) * 45) + 18 - 15,
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45)
-									+ (81 + (boat.getType().getSize() - 2) * 45) / 2 - 15,
-							30, 30, null);
-			} else if (boatDirection == 3) {
-				if (trashClicked && mouseX > (5 + ((lastCase.charAt(0) - 64) * 45)) + 600
-						&& mouseX < 600
-								+ (5 + ((lastCase.charAt(0) - 64) * 45) + 81 + (boat.getType().getSize() - 2) * 45)
-						&& mouseY > 66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45))
-						&& mouseY < 67 + (5 + 36 + (Integer.parseInt(lastCase.substring(1)) * 45)))
-					g.setColor(new Color(255, 87, 93));
-				g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45),
-						81 + (boat.getType().getSize() - 2) * 45, 36);
-				if (trashClicked)
-					g.drawImage(AssetLoader.delete,
-							5 + ((lastCase.charAt(0) - 64) * 45) + (81 + (boat.getType().getSize() - 2) * 45) / 2 - 15,
-							5 + (Integer.parseInt(lastCase.substring(1)) * 45) + 18 - 15, 30, 30, null);
-			} else if (boatDirection == 4) {
-				if (trashClicked && mouseX > 5 + ((lastCase.charAt(0) - 64) * 45) + 600
-						&& mouseX < 600 + 5 + ((lastCase.charAt(0) - 64) * 45) + 37
-						&& mouseY > 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45)
-						&& mouseY < 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45) + 81
-								+ (boat.getType().getSize() - 2) * 45)
-					g.setColor(new Color(255, 87, 93));
-				g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45), 36,
-						81 + (boat.getType().getSize() - 2) * 45);
-				if (trashClicked)
-					g.drawImage(AssetLoader.delete, 5 + ((lastCase.charAt(0) - 64) * 45) + 18 - 15,
-							5 + (Integer.parseInt(lastCase.substring(1)) * 45)
-									+ (81 + (boat.getType().getSize() - 2) * 45) / 2 - 15,
-							30, 30, null);
-			}
-
-			g.translate(-600, -42);
-		}
-
-		if (!boats.isEmpty()) {
-			if (trashPressed) {
-				g.drawImage(AssetLoader.trashPressedImg, 525, 468, 70, 70, null);
-			} else if (trashClicked) {
-				g.drawImage(AssetLoader.trashClickedImg, 525, 443, 70, 95, null);
-			} else {
-				g.drawImage(AssetLoader.trash, 525, 468, 70, 70, null);
-			}
-		}
-
-		if (boats.size() == 5) {
-			if (continuePressed) {
-				g.drawImage(AssetLoader.continueButtonPressed, 1115, 40, 60, 60, null);
-			} else if (mouseX > 1116 && mouseX < 1174 && mouseY > 65 && mouseY < 123) {
-				g.drawImage(AssetLoader.continueButtonHovered, 1115, 40, 60, 60, null);
-			} else {
-				g.drawImage(AssetLoader.continueButton, 1115, 40, 60, 60, null);
-			}
-		}
-
-		this.mouseRender(g);
-		
-		if (randomPressed) {
-			g.drawImage(AssetLoader.randomButtonPressed, 1115, 478, 60, 60, null);
-		} else if (mouseX > 1116 && mouseX < 1174 && mouseY > 503 && mouseY < 561) {
-			g.drawImage(AssetLoader.randomButtonHovered, 1115, 478, 60, 60, null);
-		} else {
-			g.drawImage(AssetLoader.randomButton, 1115, 478, 60, 60, null);
-		}
-
 	}
-	
+
 	public void mouseRender(Graphics g) {
 		BoatType type = null;
-		if (this.isPorteAvion()) {
+		if (porteAvion.isActive()) {
 			type = BoatType.PORTEAVION;
-		} else if (this.isCroiseur()) {
+		} else if (croiseur.isActive()) {
 			type = BoatType.CROISEUR;
-		} else if (this.isContreTorpilleur()) {
+		} else if (contreTorpilleur.isActive()) {
 			type = BoatType.CONTRETORPILLEUR;
-		} else if (this.isSousMarin()) {
+		} else if (sousMarin.isActive()) {
 			type = BoatType.SOUSMARIN;
-		} else if (this.isTorpilleur()) {
+		} else if (torpilleur.isActive()) {
 			type = BoatType.TORPILLEUR;
-		}else{
+		} else {
 			return;
 		}
 
@@ -300,7 +235,7 @@ public class StartingState extends State {
 
 		int column;
 		int line;
-		
+
 		if (x > 45 && x < 90) {
 			column = 1;
 		} else if (x > 90 && x < 135) {
@@ -381,7 +316,7 @@ public class StartingState extends State {
 			}
 			break;
 		}
-		
+
 		g.setColor(new Color(22, 22, 22, 100));
 		switch (direction) {
 		case 1:
@@ -393,16 +328,18 @@ public class StartingState extends State {
 			break;
 
 		case 3:
-			g.fillRect(5 + 45 * column - (45 * (type.getSize() - 1)), 5 + 45 * line, 81 + 45 * (type.getSize() - 2), 36);
+			g.fillRect(5 + 45 * column - (45 * (type.getSize() - 1)), 5 + 45 * line, 81 + 45 * (type.getSize() - 2),
+					36);
 			break;
 
 		case 4:
-			g.fillRect(5 + 45 * column, 5 + 45 * line - (45 * (type.getSize() - 1)), 36, 81 + 45 * (type.getSize() - 2));
+			g.fillRect(5 + 45 * column, 5 + 45 * line - (45 * (type.getSize() - 1)), 36,
+					81 + 45 * (type.getSize() - 2));
 			break;
 		}
 	}
 
-	private void addBoat(int x, int y) {
+	private void addBoat(int x, int y, BoatType type) {
 		Boat boat = null;
 		String column = "";
 		String line = "";
@@ -455,17 +392,7 @@ public class StartingState extends State {
 			return;
 		}
 
-		if (isPorteAvion()) {
-			boat = new Boat(BoatType.PORTEAVION, column + line, direction);
-		} else if (isCroiseur()) {
-			boat = new Boat(BoatType.CROISEUR, column + line, direction);
-		} else if (isContreTorpilleur()) {
-			boat = new Boat(BoatType.CONTRETORPILLEUR, column + line, direction);
-		} else if (isSousMarin()) {
-			boat = new Boat(BoatType.SOUSMARIN, column + line, direction);
-		} else if (isTorpilleur()) {
-			boat = new Boat(BoatType.TORPILLEUR, column + line, direction);
-		}
+		boat = new Boat(type, column + line, direction);
 
 		for (int i = 0; i < boats.size(); i++) {
 			for (int j = 0; j < boat.getCases().size(); j++) {
@@ -479,227 +406,158 @@ public class StartingState extends State {
 		boats.add(boat);
 		switch (boat.getType()) {
 		case PORTEAVION:
-			porteAvion = 2;
+			porteAvion.setUsed(true);
 			break;
 
 		case CROISEUR:
-			croiseur = 2;
+			croiseur.setUsed(true);
 			break;
 
 		case CONTRETORPILLEUR:
-			contreTorpilleur = 2;
+			contreTorpilleur.setUsed(true);
 			break;
 
 		case SOUSMARIN:
-			sousMarin = 2;
+			sousMarin.setUsed(true);
 			break;
 
 		case TORPILLEUR:
-			torpilleur = 2;
+			torpilleur.setUsed(true);
 			break;
-
 		}
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-
-		if (e.getX() > 535 && e.getX() < 585 && e.getY() > 471 && e.getY() < 537) {
-			this.trashPressed = true;
-		}
-
-		if (boats.size() == 5 && e.getX() > 1117 && e.getX() < 1174 && e.getY() > 44 && e.getY() < 100) {
-			this.continuePressed = true;
-		}
+		randomButton.mousePressed(mouseX, mouseY);
+		trashButton.mousePressed(mouseX, mouseY);
 		
-		if (mouseX > 1116 && mouseX < 1174 && mouseY > 503 && mouseY < 561)
-		{
-			this.randomPressed = true;
-		}
-
+		nameField.mousePressed(mouseX, mouseY);
+		
+		if (boats.size() == 5)
+			continueButton.update(mouseX, mouseY);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
+		int gridX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
+		int gridY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
 
-		int screenX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
-		int screenY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
+		if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && porteAvion.isActive())
+			addBoat(gridX, gridY, BoatType.PORTEAVION);
+		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && croiseur.isActive())
+			addBoat(gridX, gridY, BoatType.CROISEUR);
+		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && contreTorpilleur.isActive())
+			addBoat(gridX, gridY, BoatType.CONTRETORPILLEUR);
+		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && sousMarin.isActive())
+			addBoat(gridX, gridY, BoatType.SOUSMARIN);
+		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && torpilleur.isActive())
+			addBoat(gridX, gridY, BoatType.TORPILLEUR);
 
-		if (porteAvion == 1 || croiseur == 1 || contreTorpilleur == 1 || sousMarin == 1 || torpilleur == 1) {
-			if (screenX > 45 && screenX < 495 && screenY > 45 && screenY < 495) {
-				addBoat(screenX, screenY);
-			}
-		}
-		
-		if (mouseX > 1116 && mouseX < 1174 && mouseY > 503 && mouseY < 561)
-		{
+		porteAvion.mouseReleased(mouseX, mouseY);
+		croiseur.mouseReleased(mouseX, mouseY);
+		contreTorpilleur.mouseReleased(mouseX, mouseY);
+		sousMarin.mouseReleased(mouseX, mouseY);
+		torpilleur.mouseReleased(mouseX, mouseY);
+
+		if (randomButton.contains(mouseX, mouseY)) {
 			boats = Computer.generateBoatRandom();
-			porteAvion = 2;
-			croiseur = 2;
-			contreTorpilleur = 2;
-			sousMarin = 2;
-			torpilleur = 2;
-			randomPressed = false;
+			porteAvion.setUsed(true);
+			croiseur.setUsed(true);
+			contreTorpilleur.setUsed(true);
+			sousMarin.setUsed(true);
+			torpilleur.setUsed(true);
+			randomButton.setPressed(false);
 		}
 
-		if (trashClicked) {
+		if (trashButton.contains(mouseX, mouseY))
+			trashButton.setActive(true);
+		else if (!(gridX > 45 && gridX < 495 && gridY > 45 && gridY < 495)) {
+			trashButton.setActive(false);
+			trashButton.setPressed(false);
+		}
+
+		if (trashButton.isActive()) {
 			for (int i = 0; i < boats.size(); i++) {
 				Boat boat = boats.get(i);
+				int boatsSizeBefore = boats.size();
 
 				String firstCase = boat.getCases().get(0);
 				String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-
 				int boatDirection = boats.get(i).getDirection();
 
-				if (boatDirection == 1) {
-					if (mouseX > (5 + ((firstCase.charAt(0) - 64) * 45)) + 600
-							&& mouseX < 600
-									+ (5 + ((firstCase.charAt(0) - 64) * 45) + 81 + (boat.getType().getSize() - 2) * 45)
-							&& mouseY > 66 + (5 + (Integer.parseInt(firstCase.substring(1)) * 45))
-							&& mouseY < 67 + (5 + 36 + (Integer.parseInt(firstCase.substring(1)) * 45))) {
+				switch (direction) {
+				case 1:
+					if (mouseX > (firstCase.charAt(0) - 64) * 45 + 605
+							&& mouseX < (firstCase.charAt(0) - 64) * 45 + 605 + 81 + (boat.getType().getSize() - 2) * 45
+							&& mouseY > 66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45)
+							&& mouseY < 66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 36) {
 						boats.remove(i);
-						switch (boat.getType()) {
-						case PORTEAVION:
-							porteAvion = 0;
-							break;
-
-						case CROISEUR:
-							croiseur = 0;
-							break;
-
-						case CONTRETORPILLEUR:
-							contreTorpilleur = 0;
-							break;
-
-						case SOUSMARIN:
-							sousMarin = 0;
-							break;
-
-						case TORPILLEUR:
-							torpilleur = 0;
-							break;
-
-						}
 					}
-				} else if (boatDirection == 2) {
+					break;
+
+				case 2:
 					if (mouseX > 5 + ((firstCase.charAt(0) - 64) * 45) + 600
-							&& mouseX < 600 + 5 + ((firstCase.charAt(0) - 64) * 45) + 37
+							&& mouseX < 5 + ((firstCase.charAt(0) - 64) * 45) + 600 + 37
 							&& mouseY > 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45)
-							&& mouseY < 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 81
-									+ (boat.getType().getSize() - 2) * 45) {
+							&& mouseY < 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 81 + (boat.getType().getSize() - 2) * 45) {
 						boats.remove(i);
-						switch (boat.getType()) {
-						case PORTEAVION:
-							porteAvion = 0;
-							break;
-
-						case CROISEUR:
-							croiseur = 0;
-							break;
-
-						case CONTRETORPILLEUR:
-							contreTorpilleur = 0;
-							break;
-
-						case SOUSMARIN:
-							sousMarin = 0;
-							break;
-
-						case TORPILLEUR:
-							torpilleur = 0;
-							break;
-
-						}
 					}
-				} else if (boatDirection == 3) {
+					break;
+
+				case 3:
 					if (mouseX > (5 + ((lastCase.charAt(0) - 64) * 45)) + 600
-							&& mouseX < 600
-									+ (5 + ((lastCase.charAt(0) - 64) * 45) + 81 + (boat.getType().getSize() - 2) * 45)
+							&& mouseX < (5 + ((lastCase.charAt(0) - 64) * 45)) + 600 + 81 + (boat.getType().getSize() - 2) * 45
 							&& mouseY > 66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45))
-							&& mouseY < 67 + (5 + 36 + (Integer.parseInt(lastCase.substring(1)) * 45))) {
+							&& mouseY < 66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45)) + 36) {
 						boats.remove(i);
-						switch (boat.getType()) {
-						case PORTEAVION:
-							porteAvion = 0;
-							break;
-
-						case CROISEUR:
-							croiseur = 0;
-							break;
-
-						case CONTRETORPILLEUR:
-							contreTorpilleur = 0;
-							break;
-
-						case SOUSMARIN:
-							sousMarin = 0;
-							break;
-
-						case TORPILLEUR:
-							torpilleur = 0;
-							break;
-
-						}
 					}
-				} else if (boatDirection == 4) {
-					if (trashClicked && mouseX > 5 + ((lastCase.charAt(0) - 64) * 45) + 600
-							&& mouseX < 600 + 5 + ((lastCase.charAt(0) - 64) * 45) + 37
+					break;
+
+				case 4:
+					if (mouseX > 5 + ((lastCase.charAt(0) - 64) * 45) + 600
+							&& mouseX < 5 + ((lastCase.charAt(0) - 64) * 45) + 600 + 37
 							&& mouseY > 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45)
-							&& mouseY < 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45) + 81
-									+ (boat.getType().getSize() - 2) * 45) {
+							&& mouseY < 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45) + 81 + (boat.getType().getSize() - 2) * 45) {
 						boats.remove(i);
-						switch (boat.getType()) {
-						case PORTEAVION:
-							porteAvion = 0;
-							break;
-
-						case CROISEUR:
-							croiseur = 0;
-							break;
-
-						case CONTRETORPILLEUR:
-							contreTorpilleur = 0;
-							break;
-
-						case SOUSMARIN:
-							sousMarin = 0;
-							break;
-
-						case TORPILLEUR:
-							torpilleur = 0;
-							break;
-
-						}
 					}
+					break;
 				}
 
-			}
-			if (screenX > 45 && screenX < 495 && screenY > 45 && screenY < 495) {
-				return;
-			} else {
-				trashClicked = false;
-				return;
+				if (boatsSizeBefore > boats.size()) {
+					switch (boat.getType()) {
+					case PORTEAVION:
+						porteAvion.setUsed(false);
+						break;
+
+					case CROISEUR:
+						croiseur.setUsed(false);
+						break;
+
+					case CONTRETORPILLEUR:
+						contreTorpilleur.setUsed(false);
+						break;
+
+					case SOUSMARIN:
+						sousMarin.setUsed(false);
+						break;
+
+					case TORPILLEUR:
+						torpilleur.setUsed(false);
+						break;
+					}
+				}
 			}
 		}
 
-		if (x > 535 && x < 585 && y > 471 && y < 537) {
-			this.trashPressed = false;
-			this.trashClicked = true;
-		} else {
-			this.trashPressed = false;
-			this.trashClicked = false;
-		}
-
-		if (boats.size() == 5 && e.getX() > 1117 && e.getX() < 1174 && e.getY() > 44 && e.getY() < 100) {
+		/*if (boats.size() == 5 && e.getX() > 1117 && e.getX() < 1174 && e.getY() > 44 && e.getY() < 100) {
 			this.continuePressed = false;
-			if(currentName.isEmpty() || currentName.equals("Entrez votre nom..."))
+			if(nameField.isEmpty() || nameField.getText().equals("Entrez votre nom..."))
 			{
 				errorMessage = "Veuillez entrer votre nom...";
 				return;
 			}
-			if(stateManager.getSettupIndex() == 2)
+			/*if(stateManager.getSettupIndex() == 2)
 			{
 				if(!stateManager.getMultiplayer() && stateManager.getCore().getPlayers().get(0).getName().equals(currentName))
 				{
@@ -722,9 +580,9 @@ public class StartingState extends State {
 				}else{
 					stateManager.setCurrentState(new ChangingState(stateManager));
 				}
-			}
-		}
-
+			}*/
+		/*}
+		
 		if (x > 49 && x < 563 && y > 75 && y < 188) {
 			if (namefirst) {
 				currentName = "";
@@ -734,123 +592,37 @@ public class StartingState extends State {
 		} else {
 			name = false;
 		}
-
-		if (x > 321 && x < 540 && y > 217 && y < 255 && porteAvion != 2) {
-			porteAvion = 1;
-			if (croiseur != 2)
-				croiseur = 0;
-			if (contreTorpilleur != 2)
-				contreTorpilleur = 0;
-			if (sousMarin != 2)
-				sousMarin = 0;
-			if (torpilleur != 2)
-				torpilleur = 0;
-			direction = 1;
-			this.trashPressed = false;
-			this.trashClicked = false;
-		} else if (porteAvion != 2) {
-			porteAvion = 0;
-		}
-
-		if (x > 321 && x < 497 && y > 262 && y < 302 && croiseur != 2) {
-			if (porteAvion != 2)
-				porteAvion = 0;
-			croiseur = 1;
-			if (contreTorpilleur != 2)
-				contreTorpilleur = 0;
-			if (sousMarin != 2)
-				sousMarin = 0;
-			if (torpilleur != 2)
-				torpilleur = 0;
-			direction = 1;
-			this.trashPressed = false;
-			this.trashClicked = false;
-		} else if (croiseur != 2) {
-			croiseur = 0;
-		}
-
-		if (x > 321 && x < 452 && y > 309 && y < 348 && contreTorpilleur != 2) {
-			if (porteAvion != 2)
-				porteAvion = 0;
-			if (croiseur != 2)
-				croiseur = 0;
-			contreTorpilleur = 1;
-			if (sousMarin != 2)
-				sousMarin = 0;
-			if (torpilleur != 2)
-				torpilleur = 0;
-			direction = 1;
-			this.trashPressed = false;
-			this.trashClicked = false;
-		} else if (contreTorpilleur != 2) {
-			contreTorpilleur = 0;
-		}
-
-		if (x > 321 && x < 452 && y > 356 && y < 396 && sousMarin != 2) {
-			if (porteAvion != 2)
-				porteAvion = 0;
-			if (croiseur != 2)
-				croiseur = 0;
-			if (contreTorpilleur != 2)
-				contreTorpilleur = 0;
-			sousMarin = 1;
-			if (torpilleur != 2)
-				torpilleur = 0;
-			direction = 1;
-			this.trashPressed = false;
-			this.trashClicked = false;
-		} else if (sousMarin != 2) {
-			sousMarin = 0;
-		}
-
-		if (x > 321 && x < 409 && y > 404 && y < 444 && torpilleur != 2) {
-			if (porteAvion != 2)
-				porteAvion = 0;
-			if (croiseur != 2)
-				croiseur = 0;
-			if (contreTorpilleur != 2)
-				contreTorpilleur = 0;
-			if (sousMarin != 2)
-				sousMarin = 0;
-			torpilleur = 1;
-			direction = 1;
-			this.trashPressed = false;
-			this.trashClicked = false;
-		} else if (torpilleur != 2) {
-			torpilleur = 0;
-		}
+		
+		*/
 
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (name) {
+		if (nameField.isActive()) {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				name = false;
-				return;
+				nameField.setActive(false);
 			}
+
 			int keyCode = e.getKeyCode();
-			if ((keyCode >= 65 && keyCode <= 90 || keyCode >= 97 && keyCode <= 122) && currentName.length() < 22) {
-				currentName += e.getKeyChar();
+			if ((keyCode >= 65 && keyCode <= 90 || keyCode >= 97 && keyCode <= 122)
+					&& nameField.getText().length() < 22) {
+				nameField.addLetter(e.getKeyChar());
 			}
-			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !currentName.isEmpty()) {
-				currentName = currentName.substring(0, currentName.length() - 1);
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !nameField.getText().isEmpty()) {
+				nameField.backspace();
 			}
 		}
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -865,24 +637,6 @@ public class StartingState extends State {
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			direction = 1;
 		}
-		if (porteAvion == 1 || croiseur == 1 || contreTorpilleur == 1 || sousMarin == 1 || torpilleur == 1
-				|| trashClicked || name) {
-			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				if (porteAvion != 2)
-					porteAvion = 0;
-				if (croiseur != 2)
-					croiseur = 0;
-				if (contreTorpilleur != 2)
-					contreTorpilleur = 0;
-				if (sousMarin != 2)
-					sousMarin = 0;
-				if (torpilleur != 2)
-					torpilleur = 0;
-				trashClicked = false;
-				name = false;
-			}
-		}
-
 	}
 
 	public int getDirection() {
@@ -891,51 +645,6 @@ public class StartingState extends State {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
-	}
-
-	public boolean isPorteAvion() {
-		if (porteAvion == 1) {
-			return true;
-		} else if (porteAvion == 0) {
-			return false;
-		}
-		return false;
-	}
-
-	public boolean isCroiseur() {
-		if (croiseur == 1) {
-			return true;
-		} else if (croiseur == 0) {
-			return false;
-		}
-		return false;
-	}
-
-	public boolean isContreTorpilleur() {
-		if (contreTorpilleur == 1) {
-			return true;
-		} else if (contreTorpilleur == 0) {
-			return false;
-		}
-		return false;
-	}
-
-	public boolean isSousMarin() {
-		if (sousMarin == 1) {
-			return true;
-		} else if (sousMarin == 0) {
-			return false;
-		}
-		return false;
-	}
-
-	public boolean isTorpilleur() {
-		if (torpilleur == 1) {
-			return true;
-		} else if (torpilleur == 0) {
-			return false;
-		}
-		return false;
 	}
 
 }

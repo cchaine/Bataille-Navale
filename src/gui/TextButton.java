@@ -4,10 +4,6 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
-import com.sun.javafx.tk.FontMetrics;
-
-import sun.reflect.generics.tree.ReturnType;
-
 import java.awt.Color;
 import java.awt.Font;
 
@@ -46,11 +42,11 @@ public class TextButton {
 
 		if (isPressed) {
 			g.setColor(pressed);
-			g.drawString(hovered, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2));
+			g.drawString(hovered, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2 - 10));
 		}else if (isHovered)
-			g.drawString(hovered, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2));
+			g.drawString(hovered, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2 - 10));
 		else
-			g.drawString(normal, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2));
+			g.drawString(normal, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2 - 10));
 	}
 
 	public boolean isPressed() {

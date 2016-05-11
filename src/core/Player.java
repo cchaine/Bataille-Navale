@@ -93,6 +93,11 @@ public class Player {
 		this.winner = winner;
 	}
 	
+	public boolean isWinner()
+	{
+		return winner;
+	}
+	
 	public String getName()
 	{
 		return name;

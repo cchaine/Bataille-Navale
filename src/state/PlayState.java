@@ -39,8 +39,8 @@ public class PlayState extends State {
 
 	public PlayState(StateManager stateManager) {
 		this.stateManager = stateManager;
-		currentPlayer = stateManager.getCore().getPlayers().get(stateManager.getCurrentPlayer());
-		if (stateManager.getCurrentPlayer() == 0) {
+		currentPlayer = stateManager.getCurrentPlayer();
+		if (stateManager.getCurrentPlayer() == null) {
 			opponentPlayer = stateManager.getCore().getPlayers().get(1);
 		} else {
 			opponentPlayer = stateManager.getCore().getPlayers().get(0);
@@ -354,12 +354,12 @@ public class PlayState extends State {
 		if (x > 551 && x < 650 && y > 123 && y < 224 && fired) {
 			if (opponentPlayer.getBoats().size() == 0) {
 				currentPlayer.setWinner(true);
-				stateManager.setCurrentState(new EndGameState(stateManager, currentPlayer));
+				stateManager.setCurrentState(new EndGameState(stateManager));
 			} else if (stateManager.getMultiplayer()) {
-				stateManager.setCurrentPlayer(1);
+				//stateManager.setCurrentPlayer(1);
 				opponentPlayer.play(stateManager);
 				if (stateManager.getCore().getPlayers().get(0).getDeadBoats().size() == 5) {
-					stateManager.setCurrentState(new EndGameState(stateManager, opponentPlayer));
+					stateManager.setCurrentState(new EndGameState(stateManager));
 				} else {
 					stateManager.setCurrentState(new PlayState(stateManager));
 				}
