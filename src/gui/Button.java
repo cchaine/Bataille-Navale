@@ -57,6 +57,13 @@ public class Button {
 		else
 			isPressed = false;
 	}
+	
+	public boolean mouseReleased(int mouseX, int mouseY)
+	{
+		isPressed = false;
+		return bounds.contains(mouseX, mouseY);
+		
+	}
 
 	public boolean isPressed() {
 		return isPressed;

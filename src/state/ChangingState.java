@@ -31,8 +31,7 @@ public class ChangingState extends State{
 	 */
 	public ChangingState(StateManager stateManager) {
 		this.stateManager = stateManager;
-		
-		continueButton = new Button(Display.width / 2, 250, 100, 100, AssetLoader.continueButton, AssetLoader.continueButtonHovered, AssetLoader.continueButtonPressed);
+		continueButton = new Button(Display.width / 2, Display.height / 2, 100, 100, AssetLoader.continueButton, AssetLoader.continueButtonHovered, AssetLoader.continueButtonPressed);
 	}
 	
 	/**
@@ -67,7 +66,7 @@ public class ChangingState extends State{
 		//Affiche le nom du joueur suivant
 		g.setColor(Color.WHITE);
 		g.setFont(AssetLoader.helvetica30);
-		g.drawString("C'est au tour de " + stateManager.getCurrentPlayer() + "...", (int)(Display.width / 2 - g.getFontMetrics().getStringBounds("C'est au tour de " + stateManager.getCurrentPlayer().getName() + "...", g).getWidth() / 2), 200);
+		g.drawString("C'est au tour de " + stateManager.getCurrentPlayer().getName() + "...", (int)(Display.width / 2 - g.getFontMetrics().getStringBounds("C'est au tour de " + stateManager.getCurrentPlayer().getName() + "...", g).getWidth() / 2), 200);
 		
 		continueButton.render(g);
 	}

@@ -42,9 +42,13 @@ public class TextField {
 	
 	public void mousePressed(int mouseX, int mouseY)
 	{
-		if (bounds.contains(mouseX, mouseY))
+		if (bounds.contains(mouseX, mouseY)){
 			active = true;
-		else
+			if(currentText.equals("Entrez votre nom..."))
+			{
+				currentText = "";
+			}
+		}else
 			active = false;
 	}
 	

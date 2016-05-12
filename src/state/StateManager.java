@@ -19,7 +19,7 @@ public class StateManager {
 	private Player current;
 	private Player opponent;
 
-	private boolean multiplayer = false;
+	private boolean multiplayer = true;
 
 	/**
 	 * @briefConstructeur

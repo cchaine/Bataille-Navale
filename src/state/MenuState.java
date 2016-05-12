@@ -5,12 +5,10 @@ import java.awt.MouseInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import com.sun.javafx.stage.WindowEventDispatcher;
+import core.Computer;
 
-import core.BoatType;
 import utils.AssetLoader;
 import graphics.Display;
-import gui.BoatButton;
 import gui.TextButton;
 
 /**
@@ -217,6 +215,7 @@ public class MenuState extends State {
 			}
 
 			if (twoPlayerButton.contains(mouseX, mouseY)) {
+				stateManager.getCore().getPlayers().add(new Computer("Ordinateur"));
 				stateManager.setCurrentState(new StartingState(stateManager));
 			}
 		} else {

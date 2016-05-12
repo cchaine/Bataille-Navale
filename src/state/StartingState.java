@@ -9,8 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import javax.media.jai.operator.RenderableDescriptor;
-
 import core.Boat;
 import core.BoatType;
 import core.Computer;
@@ -19,10 +17,16 @@ import utils.AssetLoader;
 import graphics.Display;
 import gui.BoatButton;
 import gui.Button;
-import gui.TextButton;
 import gui.TextField;
 import gui.TriStateButton;
 
+/**
+ * @file src/state/StartingState.java
+ * @author cchaine
+ *
+ * @brief Classe définissant l'étape de placement des bateaux
+ * @details Création du joueur et placement des bateaux
+ */
 public class StartingState extends State {
 
 	private StateManager stateManager;
@@ -49,9 +53,15 @@ public class StartingState extends State {
 
 	private ArrayList<Boat> boats = new ArrayList<>();
 
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param stateManager		Le gestionnaire des étapes du jeu
+	 */
 	public StartingState(StateManager stateManager) {
 		this.stateManager = stateManager;
 
+		//Création des boutons de choix du type de bateau
 		porteAvion = new BoatButton(320, 213, BoatType.PORTEAVION);
 		croiseur = new BoatButton(320, 260, BoatType.CROISEUR);
 		contreTorpilleur = new BoatButton(320, 307, BoatType.CONTRETORPILLEUR);
@@ -71,8 +81,16 @@ public class StartingState extends State {
 		errorMessage = "";
 	}
 
+	/**
+	 * @brief Mise a jour de la logique du jeu ordonnée par le gestionnaire des étapes du jeu
+	 * 
+	 * @details Met à jour l'état des boutons ainsi que l'affichage du bateau fantome sous la souris
+	 */
 	@Override
 	public void update() {
+		// Récupère la position du pointeur sur l'écran et y soustrait la
+		// position de la fenêtre sur l'écran pour avoir la position du pointeur
+		// sur la fenêtre
 		mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
 		mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
 
@@ -90,6 +108,7 @@ public class StartingState extends State {
 		else
 			nameField.setHovered(false);
 
+		//Si il y a un message d'erreur, incrémenter le temps d'évolution pour faire disparaitre le message
 		if (!errorMessage.isEmpty()) {
 			errorTimeEvolution += 0.02;
 			if (errorTimeEvolution >= 3) {
@@ -99,8 +118,14 @@ public class StartingState extends State {
 		}
 	}
 
+	/**
+	 * @brief Mise à jour du rendu ordonnée par le gestionnaire des étapes du programme
+	 * 
+	 * @param g		Objet utilitaire de dessin
+	 */
 	@Override
 	public void render(Graphics g) {
+		//Fait un rendu des boutons
 		porteAvion.render(g);
 		croiseur.render(g);
 		contreTorpilleur.render(g);
@@ -116,67 +141,92 @@ public class StartingState extends State {
 		}
 
 		if (!errorMessage.isEmpty()) {
-			g.setColor(new Color(252, 67, 73, (int) (255 / errorTimeEvolution)));
+			//Défini la couleur du message d'erreur. L'alpha dépend de l'evolution du temps du message
+			//Ainsi, plus le temps augmente, plus le message disparait
+			g.setColor(new Color(252, 67, 73, (int) (255 / errorTimeEvolution)));//Rouge
 			g.setFont(AssetLoader.errorFont);
 			g.drawString(errorMessage, 525, 25);
 		}
 
 		drawGrid(g);
 
+		//Dessiné les bateaux déjà placés
 		for (int i = 0; i < boats.size(); i++) {
+			//Déplace l'origine du dessin en haut à gauche de la grille
 			g.translate(600, 42);
 
 			if (trashButton.isActive())
-				g.setColor(new Color(232, 47, 53, 240));
+				g.setColor(new Color(232, 47, 53, 240));//Rouge
 			else
-				g.setColor(new Color(0, 35, 102, 240));
+				g.setColor(new Color(0, 35, 102, 240));//Gris
 
 			Boat boat = boats.get(i);
 
 			String firstCase = boat.getCases().get(0);
 			String lastCase = boat.getCases().get(boat.getCases().size() - 1);
 			int boatDirection = boats.get(i).getDirection();
+			
+			//Le rectangle représentant le bateau. A placer sur la grille
 			Rectangle2D boatBounds = null;
 
 			switch (boatDirection) {
 			case 1:
-				boatBounds = new Rectangle((firstCase.charAt(0) - 64) * 45 + 605,
-						66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45),
+				/* Le rectangle à des coordonnées précises :
+				 * Pour x:
+				 * 		-Déduit l'index de la colonne grâce à la table ASCII (La valeur du caractère soustrait à la valeur de A)
+				 * 		-Multiplie par 45 car chaque case fait 45 pixels
+				 * 		-Ajoute 600 car la grille est à 605 pixels en x
+				 * 		-Ajoute 5 car le rectangle à un léger offset
+				 * Pour y:
+				 * 		-Transforme la colonne alors stockée en String en un Integer
+				 * 		-Multiplie par 45 car chaque case fait 45 pixels
+				 * 		-Ajoute 66 car la grille est à 66 pixels en y
+				 * 		-Ajoute 5 car le rectangle à un léger offset
+				 * La largeur du bateau est égale à la largeur du torpilleur additionnée aux nombres de cases du bateau moins deux et multiplié par 45 (la taille d'une case)
+				 * L'épaisseur est de 36 pixels
+				 */
+				boatBounds = new Rectangle((firstCase.charAt(0) - 64) * 45 + 600 + 5,
+						(Integer.parseInt(firstCase.substring(1)) * 45) + 66 + 5,
 						81 + (boat.getType().getSize() - 2) * 45, 36);
 				break;
 
 			case 2:
 				boatBounds = new Rectangle(5 + ((firstCase.charAt(0) - 64) * 45) + 600,
-						67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45), 37,
+						(Integer.parseInt(firstCase.substring(1)) * 45) + 66 + 5, 37,
 						81 + (boat.getType().getSize() - 2) * 45);
 				break;
 
 			case 3:
 				boatBounds = new Rectangle((5 + ((lastCase.charAt(0) - 64) * 45)) + 600,
-						66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45)),
+						(Integer.parseInt(lastCase.substring(1)) * 45) + 66 + 5,
 						81 + (boat.getType().getSize() - 2) * 45, 36);
 				break;
 
 			case 4:
 				boatBounds = new Rectangle(5 + ((lastCase.charAt(0) - 64) * 45) + 600,
-						67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45), 37,
+						(Integer.parseInt(lastCase.substring(1)) * 45) + 66 + 5, 37,
 						81 + (boat.getType().getSize() - 2) * 45);
 				break;
 			}
 
+			//Si la poubelle et que la sourie est dessus
 			if (trashButton.isActive() && boatBounds.contains(mouseX, mouseY))
-				g.setColor(new Color(255, 87, 93));
+				g.setColor(new Color(255, 87, 93));//Rouge clair
 
-			g.fillRect((int) (boatBounds.getX() - 600), (int) (boatBounds.getY() - 66), (int) boatBounds.getWidth(),
+			//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
+			g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
 					(int) boatBounds.getHeight());
 
 			if (trashButton.isActive())
+				//Dessine un croix
 				g.drawImage(AssetLoader.delete, (int) (boatBounds.getX() - 600 + boatBounds.getWidth() / 2 - 15),
 						(int) (boatBounds.getY() - 66 + boatBounds.getHeight() / 2 - 15), 30, 30, null);
 
+			//Redéplace l'origine du dessin à sa position précédente
 			g.translate(-600, -42);
 		}
 
+		//Si tous les bateaux sont placés ont peut continuer
 		if (boats.size() == 5) {
 			continueButton.render(g);
 		}
@@ -184,8 +234,15 @@ public class StartingState extends State {
 		this.mouseRender(g);
 	}
 
+	/**
+	 * @brief Dessine la grille de jeu
+	 * @details Affiche la grille et écrit les lettres
+	 * 
+	 * @param g		Objet utilitaire de dessin
+	 */
 	private void drawGrid(Graphics g) {
 		g.drawImage(AssetLoader.grid, 600, 42, null);
+		
 		g.setFont(AssetLoader.helvetica35);
 		g.setColor(new Color(0x333333, false));
 		g.drawString("A", 655, 77);
@@ -228,57 +285,57 @@ public class StartingState extends State {
 		}
 
 		int direction = this.getDirection();
-		int x = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
-		int y = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
+		int gridX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
+		int gridY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
 
 		g.translate(600, 42);
 
 		int column;
 		int line;
 
-		if (x > 45 && x < 90) {
+		if (gridX > 45 && gridX < 90) {
 			column = 1;
-		} else if (x > 90 && x < 135) {
+		} else if (gridX > 90 && gridX < 135) {
 			column = 2;
-		} else if (x > 135 && x < 180) {
+		} else if (gridX > 135 && gridX < 180) {
 			column = 3;
-		} else if (x > 180 && x < 225) {
+		} else if (gridX > 180 && gridX < 225) {
 			column = 4;
-		} else if (x > 225 && x < 270) {
+		} else if (gridX > 225 && gridX < 270) {
 			column = 5;
-		} else if (x > 270 && x < 315) {
+		} else if (gridX > 270 && gridX < 315) {
 			column = 6;
-		} else if (x > 315 && x < 360) {
+		} else if (gridX > 315 && gridX < 360) {
 			column = 7;
-		} else if (x > 360 && x < 405) {
+		} else if (gridX > 360 && gridX < 405) {
 			column = 8;
-		} else if (x > 405 && x < 450) {
+		} else if (gridX > 405 && gridX < 450) {
 			column = 9;
-		} else if (x > 450 && x < 495) {
+		} else if (gridX > 450 && gridX < 495) {
 			column = 10;
 		} else {
 			return;
 		}
 
-		if (y > 45 && y < 90) {
+		if (gridY > 45 && gridY < 90) {
 			line = 1;
-		} else if (y > 90 && y < 135) {
+		} else if (gridY > 90 && gridY < 135) {
 			line = 2;
-		} else if (y > 135 && y < 180) {
+		} else if (gridY > 135 && gridY < 180) {
 			line = 3;
-		} else if (y > 180 && y < 225) {
+		} else if (gridY > 180 && gridY < 225) {
 			line = 4;
-		} else if (y > 225 && y < 270) {
+		} else if (gridY > 225 && gridY < 270) {
 			line = 5;
-		} else if (y > 270 && y < 315) {
+		} else if (gridY > 270 && gridY < 315) {
 			line = 6;
-		} else if (y > 315 && y < 360) {
+		} else if (gridY > 315 && gridY < 360) {
 			line = 7;
-		} else if (y > 360 && y < 405) {
+		} else if (gridY > 360 && gridY < 405) {
 			line = 8;
-		} else if (y > 405 && y < 450) {
+		} else if (gridY > 405 && gridY < 450) {
 			line = 9;
-		} else if (y > 450 && y < 495) {
+		} else if (gridY > 450 && gridY < 495) {
 			line = 10;
 		} else {
 			return;
@@ -435,7 +492,7 @@ public class StartingState extends State {
 		nameField.mousePressed(mouseX, mouseY);
 		
 		if (boats.size() == 5)
-			continueButton.update(mouseX, mouseY);
+			continueButton.mousePressed(mouseX, mouseY);
 	}
 
 	@Override
@@ -486,7 +543,7 @@ public class StartingState extends State {
 				String lastCase = boat.getCases().get(boat.getCases().size() - 1);
 				int boatDirection = boats.get(i).getDirection();
 
-				switch (direction) {
+				switch (boatDirection) {
 				case 1:
 					if (mouseX > (firstCase.charAt(0) - 64) * 45 + 605
 							&& mouseX < (firstCase.charAt(0) - 64) * 45 + 605 + 81 + (boat.getType().getSize() - 2) * 45
@@ -549,52 +606,42 @@ public class StartingState extends State {
 				}
 			}
 		}
-
-		/*if (boats.size() == 5 && e.getX() > 1117 && e.getX() < 1174 && e.getY() > 44 && e.getY() < 100) {
-			this.continuePressed = false;
-			if(nameField.isEmpty() || nameField.getText().equals("Entrez votre nom..."))
+		
+		if(boats.size() == 5){
+			if(continueButton.mouseReleased(mouseX, mouseY))
 			{
-				errorMessage = "Veuillez entrer votre nom...";
-				return;
-			}
-			/*if(stateManager.getSettupIndex() == 2)
-			{
-				if(!stateManager.getMultiplayer() && stateManager.getCore().getPlayers().get(0).getName().equals(currentName))
+				if(nameField.isEmpty() || nameField.getText().equals("Entrez votre nom..."))
 				{
-					errorMessage = "Ce nom est déjà pris...";
+					errorMessage = "Veuillez entrer votre nom...";
 					return;
 				}
-			}
-			stateManager.getCore().getPlayers().add(new Player(currentName, boats));
-			if(stateManager.getSettupIndex() == 1)
-			{
-				stateManager.setSettupIndex(2);
-				stateManager.setCurrentState(new StartingState(stateManager));
-			}else if(stateManager.getSettupIndex() == 2)
-			{
-				if(stateManager.getMultiplayer())
+				if(stateManager.getMultiplayer() && !stateManager.getCore().getPlayers().isEmpty())
 				{
-					stateManager.getCore().getPlayers().add(new Computer("Ordinateur"));
-					stateManager.setCurrentPlayer(0);
-					stateManager.setCurrentState(new PlayState(stateManager));
-				}else{
-					stateManager.setCurrentState(new ChangingState(stateManager));
+					if(stateManager.getCore().getPlayers().get(0).getName().equals(nameField.getText())){
+						errorMessage = "Ce nom est déjà pris...";
+						return;
+					}
 				}
-			}*/
-		/*}
-		
-		if (x > 49 && x < 563 && y > 75 && y < 188) {
-			if (namefirst) {
-				currentName = "";
+				
+				stateManager.getCore().getPlayers().add(new Player(nameField.getText(), boats));
+				
+				if(stateManager.getCore().getPlayers().size() == 1 && stateManager.getMultiplayer())
+				{
+					stateManager.setCurrentState(new StartingState(stateManager));
+				}else
+				{
+					if(stateManager.getMultiplayer())
+					{
+						stateManager.setCurrent(stateManager.getCore().getPlayers().get(0));
+						stateManager.setCurrentState(new ChangingState(stateManager));
+					}else{
+						stateManager.setCurrent(stateManager.getCore().getPlayers().get(1));
+						stateManager.setCurrentState(new PlayState(stateManager));
+						
+					}
+				}
 			}
-			namefirst = false;
-			name = true;
-		} else {
-			name = false;
 		}
-		
-		*/
-
 	}
 
 	@Override
