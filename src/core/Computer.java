@@ -3,6 +3,8 @@ package core;
 import java.util.ArrayList;
 import java.util.PrimitiveIterator.OfDouble;
 
+import javax.print.attribute.standard.PrinterLocation;
+
 import state.EndGameState;
 import state.MenuState;
 import state.StateManager;
@@ -386,7 +388,7 @@ public class Computer extends Player {
 				}
 			}
 		} while (!fired);
-		stateManager.setCurrentPlayer(0);
+		//stateManager.setCurrentPlayer(0);
 	}
 
 	public static boolean isOnCase(Boat boatBuffer, ArrayList<Boat> boat) {

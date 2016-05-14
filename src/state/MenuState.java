@@ -1,31 +1,35 @@
 package state;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.MouseInfo;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import graphics.AssetLoader;
-import graphics.Display;
-import sun.applet.Main;
+import core.Computer;
 
+import utils.AssetLoader;
+import graphics.Display;
+import gui.TextButton;
+
+/**
+ * @file src/state/MenuState.java
+ * @author cchaine
+ *
+ * @brief Classe définissant l'étape du menu du programme
+ * @details Etape du menu, possibilité de choisir entre deux modes de jeu
+ */
 public class MenuState extends State {
 
-	private boolean playPressed = false;
-	private boolean helpPressed = false;
-	private boolean quitPressed = false;
-	private String playStr = "jouer";
-	private String helpStr = "aide";
-	private String quitStr = "quitter";
-	private String onePlayerStr = "joeuur vs ordinateur";
-	private String twoPlayerStr = "joueur vs joueur";
-	private boolean onePlayerPressed = false;
-	private boolean twoPlayerPressed = false;
+	private TextButton playButton;
+	private TextButton quitButton;
+	private TextButton onePlayerButton;
+	private TextButton twoPlayerButton;
+	private float buttonOffset = 600;
+	private float buttonAlpha = 0;
+
+	private StateManager stateManager;
+
+	private boolean modeSelection = false;
 
 	private int wave1X = 0;
 	private int wave2X = 1200;
@@ -33,220 +37,209 @@ public class MenuState extends State {
 	private int wave4X = 1200;
 
 	private float timeEvolution = 0;
-	private float boatX = 20, boatY = 400;
-	private float buttonOffset = 600;
-	private float buttonAlpha = 0;
-	private boolean isPlay = false;
-	private boolean isHelp = false;
-	
-	private StateManager stateManager;
+	private float boatY = 400;
 
-	private int x, y;
+	private int mouseX, mouseY;
 
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param stateManager		Le gestionnaire des étapes du jeu
+	 */
 	public MenuState(StateManager stateManager) {
 		this.stateManager = stateManager;
+
+		// Création des boutons
+		playButton = new TextButton(Display.width / 2, (int) buttonOffset, "jouer", "JOUER", new Color(0x68D16A),
+				AssetLoader.junebug50);
+		quitButton = new TextButton(Display.width / 2, (int) buttonOffset + 160, "quitter", "QUITTER",
+				new Color(0xE72623), AssetLoader.junebug50);
+		onePlayerButton = new TextButton(Display.width / 2, (int) buttonOffset, "joueur vs ordinateur",
+				"JOUEUR VS ORDINATEUR", new Color(0x76FF78), AssetLoader.junebug50);
+		twoPlayerButton = new TextButton(Display.width / 2, (int) buttonOffset, "joueur vs joueur", "JOUEUR VS JOUEUR",
+				new Color(0x76FF78), AssetLoader.junebug50);
 	}
 
+	/**
+	 * @brief Mise a jour de la logique du jeu ordonnée par le gestionnaire des étapes du jeu
+	 * 
+	 * @details Met à jour l'état des boutons ainsi que la position des vagues et du bateau
+	 */
 	public void update() {
-		x = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
-		y = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
+		// Récupère la position du pointeur sur l'écran et y soustrait la
+		// position de la fenêtre sur l'écran pour avoir la position du pointeur
+		// sur la fenêtre
+		mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
+		mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
 
 		timeEvolution += 0.1f;
-		boatY -= Math.cos(timeEvolution) / 3;
+		boatY -= Math.cos(timeEvolution) / 3; // Varier la hauteur du bateau
+												// suivant une fonction cosinus
 
-		if (buttonOffset > 250 && timeEvolution > 0.8) {
+		// Effectue un déplacement des boutons de l'extérieur de la fenêtre à Y = 250
+		if (buttonOffset > 250 && timeEvolution > 0.8)
 			buttonOffset -= Math.pow(2, buttonOffset / 130);
-		} else if (buttonOffset <= 250) {
+		else if (buttonOffset <= 250)
 			buttonOffset = 250;
-		}
 
-		if (buttonAlpha >= 165) {
+		// Effectue un fondu des boutons
+		if (buttonAlpha >= 165)
 			buttonAlpha = 170;
-		} else if (buttonAlpha < 255 && buttonOffset < 400) {
+		else if (buttonAlpha < 255 && buttonOffset < 400)
 			buttonAlpha += Math.pow(2, buttonOffset / 130);
+
+		// Déplace les vagues de la droite vers la gauche
+		if (wave1X <= -1200) // Si la vague de devant est hors de l'écran, la mettre à droite
+			wave1X = 1198;
+		else if (wave1X > -1200)
+			wave1X -= 2;
+
+		if (wave2X <= -1200)
+			wave2X = 1198;
+		else if (wave2X > -1200)
+			wave2X -= 2;
+
+		if (wave3X <= -1200) // Si la vague de derrière est hors de l'écran, la mettre à droite
+			wave3X = 1198;
+		else if (wave3X > -1200)
+			wave3X -= 1;
+
+		if (wave4X <= -1200)
+			wave4X = 1198;
+		else if (wave4X > -1200)
+			wave4X -= 1;
+
+		if (modeSelection) {
+			if (onePlayerButton.contains(mouseX, mouseY))
+				onePlayerButton.setHovered(true);
+			else
+				onePlayerButton.setHovered(false);
+			onePlayerButton.setPosition(Display.width / 2 + 90, (int) buttonOffset); // Met à jour la position du bouton en fonction du déplacement vers le haut
+
+			if (twoPlayerButton.contains(mouseX, mouseY))
+				twoPlayerButton.setHovered(true);
+			else
+				twoPlayerButton.setHovered(false);
+			twoPlayerButton.setPosition(Display.width / 2, (int) (buttonOffset) + 110);
+		} else {
+			if (playButton.contains(mouseX, mouseY))
+				playButton.setHovered(true);
+			else
+				playButton.setHovered(false);
+			playButton.setPosition(Display.width / 2, (int) buttonOffset);
+
+			if (quitButton.contains(mouseX, mouseY))
+				quitButton.setHovered(true);
+			else
+				quitButton.setHovered(false);
+			quitButton.setPosition(Display.width / 2, (int) buttonOffset + 160);
 		}
 		
-		if(wave1X <= -1200)
-		{
-			wave1X = 1198;
-		}else if(wave1X > -1200)
-		{
-			wave1X -= 2;
-		}
-		if(wave2X <= -1200)
-		{
-			wave2X = 1198;
-		}else if(wave2X > -1200)
-		{
-			wave2X -= 2;
-		}
-		if(wave3X <= -1200)
-		{
-			wave3X = 1198;
-		}else if(wave3X > -1200)
-		{
-			wave3X -= 1;
-		}
-		if(wave4X <= -1200)
-		{
-			wave4X = 1198;
-		}else if(wave4X > -1200)
-		{
-			wave4X -= 1;
-		}
-
 	}
 
+	/**
+	 * @brief Mise à jour du rendu ordonnée par le gestionnaire des étapes du programme
+	 * 
+	 * @param g		Objet utilitaire de dessin
+	 */
 	public void render(java.awt.Graphics g) {
+		// Dessine les vagues de derrière
 		g.drawImage(AssetLoader.waves, wave3X, 515, 1200, 100, null);
 		g.drawImage(AssetLoader.waves, wave4X, 515, 1200, 100, null);
-		g.drawImage(AssetLoader.boat, (int) boatX, (int) boatY, 400, 200, null);
+
+		// Dessine le bateau
+		g.drawImage(AssetLoader.boat, 20, (int) boatY, 400, 200, null);
+
+		// Dessine les vagues de devant
 		g.drawImage(AssetLoader.waves, wave1X, 535, 1200, 100, null);
 		g.drawImage(AssetLoader.waves, wave2X, 535, 1200, 100, null);
-		
+
+		// Dessine le titre au milieu de l'écran
 		g.setFont(AssetLoader.junebug60);
 		g.setColor(new Color(0x002366));
-		g.drawString("BATAILLE NAVALE", (int)(600 - g.getFontMetrics().getStringBounds("BATAILLE NAVALE", g).getWidth() / 2), 100);
+		g.drawString("BATAILLE NAVALE",
+				(int) (600 - g.getFontMetrics().getStringBounds("BATAILLE NAVALE", g).getWidth() / 2), 100);
 
 		g.setFont(AssetLoader.junebug50);
 
-		if (isPlay) {
-			if (onePlayerPressed && buttonOffset == 250) {
-				onePlayerStr = "JOUEUR VS ORDINATEUR";
-				g.setColor(new Color(0x76FF78));
-			} else if (x > 271 && x < 1118 && y > 233 && y < 280 && buttonOffset == 250) {
-				onePlayerStr = "JOUEUR VS ORDINATEUR";
-				g.setColor(new Color(0x002366));
-			} else {
-				onePlayerStr = "joueur vs ordinateur";
-				g.setColor(new Color(0, 35, 102, (int) (buttonAlpha * 1.5)));
-			}
-			g.drawString(onePlayerStr, 265, (int) buttonOffset);
-
-			if (twoPlayerPressed && buttonOffset == 250) {
-				twoPlayerStr = "JOUEUR VS JOUEUR";
-				g.setColor(new Color(0x76FF78));
-			} else if (x > 272 && x < 939 && y > 344 && y < 390 && buttonOffset == 250) {
-				twoPlayerStr = "JOUEUR VS JOUEUR";
-				g.setColor(new Color(0x002366));
-			} else {
-				twoPlayerStr = "joueur vs joueur";
-				g.setColor(new Color(0, 35, 102, (int) (buttonAlpha * 1.5)));
-			}
-			g.drawString(twoPlayerStr, 265, (int) buttonOffset + 110);
+		if (modeSelection) {
+			onePlayerButton.render(g, buttonAlpha);
+			twoPlayerButton.render(g, buttonAlpha);
 		} else {
-
-			if (playPressed && buttonOffset == 250) {
-				playStr = "JOUER";
-				g.setColor(new Color(0x68D16A));
-			} else if (x > 487 && x < 695 && y > 234 && y < 280 && buttonOffset == 250) {
-				playStr = "JOUER";
-				g.setColor(new Color(0x002366));
-			} else {
-				playStr = "jouer";
-				g.setColor(new Color(0, 35, 102, (int) (buttonAlpha * 1.5)));
-			}
-			g.drawString(playStr, 480, (int) buttonOffset);
-
-			if (quitPressed && buttonOffset == 250) {
-				quitStr = "QUITTER";
-				g.setColor(new Color(0xE72623));
-			} else if (x > 444 && x < 744 && y > 396 && y < 435 && buttonOffset == 250) {
-				quitStr = "QUITTER";
-				g.setColor(new Color(0x002366));
-			} else {
-				quitStr = "quitter";
-				g.setColor(new Color(0, 35, 102, (int) (buttonAlpha * 1.5)));
-			}
-
-			g.drawString(quitStr, 440, (int) buttonOffset + 160);
+			playButton.render(g, buttonAlpha);
+			quitButton.render(g, buttonAlpha);
 		}
 	}
 
+	/**
+	 * @brief Gestion des évènement souris pressée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	public void mousePressed(MouseEvent e) {
-		System.out.println(x + " " + y);
-		if (buttonOffset == 250) {
-			if (isPlay) {
-				if (x > 271 && x < 1118 && y > 233 && y < 280) {
-					onePlayerPressed = true;
-				} else {
-					onePlayerPressed = false;
-				}
+		if (modeSelection) {
+			// On verifie si la position de la souris est dans le bouton
+			if (onePlayerButton.contains(mouseX, mouseY))
+				onePlayerButton.setPressed(true);
+			else
+				onePlayerButton.setPressed(false);
 
-				if (x > 272 && x < 939 && y > 344 && y < 390) {
-					twoPlayerPressed = true;
-				} else {
-					twoPlayerPressed = false;
-				}
-			} else {
-				if (x > 487 && x < 695 && y > 234 && y < 280) {
-					playPressed = true;
-				} else {
-					playPressed = false;
-				}
+			if (twoPlayerButton.contains(mouseX, mouseY))
+				twoPlayerButton.setPressed(true);
+			else
+				twoPlayerButton.setPressed(true);
+		} else {
+			if (playButton.contains(mouseX, mouseY))
+				playButton.setPressed(true);
+			else
+				playButton.setPressed(false);
 
-				if (x > 444 && x < 744 && y > 396 && y < 435) {
-					quitPressed = true;
-				} else {
-					quitPressed = false;
-				}
-			}
+			if (quitButton.contains(mouseX, mouseY))
+				quitButton.setPressed(true);
+			else
+				quitButton.setPressed(false);
 		}
-
 	}
 
+	/**
+	 * @brief Gestion des évènement souris relachée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	public void mouseReleased(MouseEvent e) {
-		if (isPlay) {
-			if (x > 271 && x < 1118 && y > 233 && y < 280) {
-				stateManager.setSettupIndex(2);
+		if (modeSelection) {
+			// On verifie si la position de la souris est dans le bouton
+			if (onePlayerButton.contains(mouseX, mouseY)) {
+				stateManager.getCore().getPlayers().add(new Computer("Ordinateur"));
+				stateManager.setCurrentState(new StartingState(stateManager));
+			}
+
+			if (twoPlayerButton.contains(mouseX, mouseY)) {
 				stateManager.setMultiplayer(true);
 				stateManager.setCurrentState(new StartingState(stateManager));
 			}
-
-			if (x > 272 && x < 939 && y > 344 && y < 390) {
-				stateManager.setSettupIndex(1);
-				stateManager.setCurrentState(new StartingState(stateManager));
-			}
-
-			onePlayerPressed = false;
-			twoPlayerPressed = false;
-		} else if (buttonOffset == 250) {
-			if (x > 444 && x < 744 && y > 396 && y < 435) {
+		} else {
+			if (quitButton.contains(mouseX, mouseY))
 				System.exit(0);
-			}
 
-			if (x > 487 && x < 695 && y > 234 && y < 280) {
-				isPlay = true;
+			if (playButton.contains(mouseX, mouseY)) {
+				modeSelection = true;
 				buttonOffset = 600;
 				buttonAlpha = 0;
 			}
-
-			playPressed = false;
-			helpPressed = false;
-			quitPressed = false;
 		}
 	}
 
-	public void mouseClicked(MouseEvent e) {
-
-	}
+	@Override
+	public void keyTyped(KeyEvent e) {}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyPressed(KeyEvent e) {}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 }
