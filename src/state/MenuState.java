@@ -210,12 +210,12 @@ public class MenuState extends State {
 		if (modeSelection) {
 			// On verifie si la position de la souris est dans le bouton
 			if (onePlayerButton.contains(mouseX, mouseY)) {
-				stateManager.setMultiplayer(true);
+				stateManager.getCore().getPlayers().add(new Computer("Ordinateur"));
 				stateManager.setCurrentState(new StartingState(stateManager));
 			}
 
 			if (twoPlayerButton.contains(mouseX, mouseY)) {
-				stateManager.getCore().getPlayers().add(new Computer("Ordinateur"));
+				stateManager.setMultiplayer(true);
 				stateManager.setCurrentState(new StartingState(stateManager));
 			}
 		} else {
@@ -231,19 +231,15 @@ public class MenuState extends State {
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-	}
+	public void keyPressed(KeyEvent e) {}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 }

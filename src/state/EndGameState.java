@@ -5,10 +5,12 @@ import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 
 import core.Boat;
 import core.Player;
 import utils.AssetLoader;
+import utils.DrawingUtils;
 import graphics.Display;
 import gui.Button;
 import gui.TextButton;
@@ -39,6 +41,11 @@ public class EndGameState extends State {
 
 	private int mouseX, mouseY;
 
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param stateManager		Gestionnaire des étapes du programme
+	 */
 	public EndGameState(StateManager stateManager) {
 		this.stateManager = stateManager;
 
@@ -52,7 +59,7 @@ public class EndGameState extends State {
 
 		menuButton = new TextButton(Display.width / 2, (int) buttonOffset + 80, "menu", "MENU", new Color(0x68D16A),
 				AssetLoader.junebug50);
-		resultButton = new TextButton(Display.width / 2, (int) buttonOffset - 30, "result", "RESULT",
+		resultButton = new TextButton(Display.width / 2, (int) buttonOffset - 30, "resultat", "RESULTAT",
 				new Color(0x68D16A), AssetLoader.junebug50);
 		quitButton = new TextButton(Display.width / 2, (int) buttonOffset + 200, "quitter", "QUITTER",
 				new Color(0xE72623), AssetLoader.junebug50);
@@ -60,11 +67,17 @@ public class EndGameState extends State {
 		continueButton = new Button(Display.width / 2, 140, 100, 100, AssetLoader.continueButton, AssetLoader.continueButtonHovered, AssetLoader.continueButtonPressed);
 	}
 
+	/**
+	 * @brief Mise a jour de la logique du jeu ordonnée par le gestionnaire des étapes du jeu
+	 * 
+	 * @details Met à jour l'état des boutons ainsi que la position des vagues et du bateau
+	 */
 	@Override
 	public void update() {
-		// Récupère la position du pointeur sur l'écran et y soustrait la
-		// position de la fenêtre sur l'écran pour avoir la position du pointeur
-		// sur la fenêtre
+		/* Récupère la position du pointeur sur l'écran et y soustrait la
+		 * position de la fenêtre sur l'écran pour avoir la position du pointeur
+		 * sur la fenêtre
+		 */
 		mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x;
 		mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
 
@@ -131,6 +144,11 @@ public class EndGameState extends State {
 		}
 	}
 
+	/**
+	 * @brief Mise à jour du rendu ordonnée par le gestionnaire des étapes du programme
+	 * 
+	 * @param g		Objet utilitaire de dessin
+	 */
 	@Override
 	public void render(Graphics g) {
 		g.drawImage(AssetLoader.waves, wave3X, 515, 1200, 100, null);
@@ -140,15 +158,15 @@ public class EndGameState extends State {
 		g.drawImage(AssetLoader.waves, wave2X, 535, 1200, 100, null);
 
 		if (!showingGrid) {
-			if (g.getFontMetrics().getStringBounds(winner.getName().toUpperCase() + " EST LE GAGNANT", g).getWidth()
-					/ 2 > 100) {
+			//Choisie la taille de la police en fonction de la taille du texte a afficher
+			if (g.getFontMetrics().getStringBounds(winner.getName().toUpperCase() + " EST LE GAGNANT", g).getWidth() / 2 > 100)
 				g.setFont(AssetLoader.junebug35);
-			} else {
+			else
 				g.setFont(AssetLoader.junebug50);
-			}
 
 			g.setColor(new Color(0x002366));
 
+			//A la position est soustraite la moitié de la taille du texte, car Graphics dessine le texte non centré
 			g.drawString(winner.getName().toUpperCase() + " EST LE GAGNANT",
 					(int) (600 - g.getFontMetrics()
 							.getStringBounds(winner.getName().toUpperCase() + " EST LE GAGNANT", g).getWidth() / 2),
@@ -161,7 +179,7 @@ public class EndGameState extends State {
 			quitButton.render(g, buttonAlpha);
 		} else {
 			g.setColor(new Color(255, 255, 255, 190));
-			g.fillRect(10, 10, 1180, 580);
+			g.fillRect(10, 10, 1180, 580); //Background
 
 			g.setColor(new Color(0, 35, 102, 240));
 			g.setFont(AssetLoader.helvetica25);
@@ -173,215 +191,124 @@ public class EndGameState extends State {
 
 			continueButton.render(g);
 
-			g.drawImage(AssetLoader.grid, 29, 75, null);
-			g.setFont(AssetLoader.helvetica35);
-			g.setColor(new Color(0x333333, false));
-			g.drawString("A", 55 + 29, 110);
-			g.drawString("B", 100 + 29, 110);
-			g.drawString("C", 145 + 29, 110);
-			g.drawString("D", 190 + 29, 110);
-			g.drawString("E", 235 + 29, 110);
-			g.drawString("F", 281 + 29, 110);
-			g.drawString("G", 324 + 29, 110);
-			g.drawString("H", 370 + 29, 110);
-			g.drawString("I", 422 + 29, 110);
-			g.drawString("J", 463 + 29, 110);
+			DrawingUtils.drawGrid(g, 29, 75);
 
-			g.drawString("1", 41, 122 + 33);
-			g.drawString("2", 41, 167 + 33);
-			g.drawString("3", 41, 212 + 33);
-			g.drawString("4", 41, 257 + 33);
-			g.drawString("5", 41, 302 + 33);
-			g.drawString("6", 41, 347 + 33);
-			g.drawString("7", 41, 392 + 33);
-			g.drawString("8", 41, 437 + 33);
-			g.drawString("9", 41, 482 + 33);
-			g.drawString("10", 31, 527 + 33);
-
+			//Déplace l'origine du dessin en haut à gauche de A1 de la grille de gauche
 			g.translate(29, 75);
+			
+			//Affiche les bateaux vivants du gagnant sur la grille
 			for (int i = 0; i < winner.getBoats().size(); i++) {
 				Boat boat = winner.getBoats().get(i);
 
-				if (boat.isAlive()) {
-					g.setColor(new Color(51, 51, 51, 240));
-				} else {
-					g.setColor(new Color(151, 151, 151, 240));
-				}
-				String firstCase = boat.getCases().get(0);
-				String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-
-				int boatDirection = winner.getBoats().get(i).getDirection();
-
-				if (boatDirection == 1) {
-					g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45),
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45),
-							81 + (boat.getType().getSize() - 2) * 45, 36);
-				} else if (boatDirection == 2) {
-					g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45),
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45), 36,
-							81 + (boat.getType().getSize() - 2) * 45);
-				} else if (boatDirection == 3) {
-					g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45),
-							81 + (boat.getType().getSize() - 2) * 45, 36);
-				} else if (boatDirection == 4) {
-					g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45),
-							36, 81 + (boat.getType().getSize() - 2) * 45);
-				}
+				g.setColor(new Color(51, 51, 51, 240));//Gris fonc�
+				
+				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
+				
+				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
+				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
+						(int) boatBounds.getHeight());
 			}
 
+			//Affiche les bateaux morts du gagnant sur la grille
 			for (int i = 0; i < winner.getDeadBoats().size(); i++) {
-				g.setColor(new Color(151, 151, 151, 240));
-				if (!winner.getDeadBoats().get(i).isAlive()) {
-					Boat boat = winner.getDeadBoats().get(i);
-					if (boat.getDirection() == 1) {
-						g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
-								5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45),
-								81 + (boat.getType().getSize() - 2) * 45, 36);
-					} else if (boat.getDirection() == 2) {
-						g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
-								5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45), 36,
-								81 + (boat.getType().getSize() - 2) * 45);
-					} else if (boat.getDirection() == 3) {
-						g.fillRect(5 + ((boat.getCases().get(boat.getCases().size() - 1).charAt(0) - 64) * 45), 5
-								+ (Integer.parseInt(boat.getCases().get(boat.getCases().size() - 1).substring(1)) * 45),
-								81 + (boat.getType().getSize() - 2) * 45, 36);
-					} else if (boat.getDirection() == 4) {
-						g.fillRect(5 + ((boat.getCases().get(boat.getCases().size() - 1).charAt(0) - 64) * 45), 5
-								+ (Integer.parseInt(boat.getCases().get(boat.getCases().size() - 1).substring(1)) * 45),
-								36, 81 + (boat.getType().getSize() - 2) * 45);
-					}
-				}
+				
+				g.setColor(new Color(151, 151, 151, 240));//Gris clair
+				
+				Boat boat = winner.getDeadBoats().get(i);
+				
+				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
+				
+				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
+				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
+						(int) boatBounds.getHeight());
 			}
 
+			//Affiche les cases touch�es par l'ennemi
 			for (int i = 0; i < loser.getWinHistory().size(); i++) {
 				String cases = loser.getWinHistory().get(i);
+				
 				g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
 						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 			}
+			
+			//Affiche les cases dans l'eau de l'ennemi
 			for (int i = 0; i < loser.getFailHistory().size(); i++) {
 				String cases = loser.getFailHistory().get(i);
+				
 				g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
 						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 			}
 
+			//Red�place l'origine du rep�re � sa position initiale
 			g.translate(-29, -75);
 
-			g.drawImage(AssetLoader.grid, 675, 75, null);
-			g.setFont(AssetLoader.helvetica35);
-			g.setColor(new Color(0x333333, false));
-			g.drawString("A", 730, 110);
-			g.drawString("B", 775, 110);
-			g.drawString("C", 820, 110);
-			g.drawString("D", 865, 110);
-			g.drawString("E", 910, 110);
-			g.drawString("F", 956, 110);
-			g.drawString("G", 999, 110);
-			g.drawString("H", 1045, 110);
-			g.drawString("I", 1097, 110);
-			g.drawString("J", 1138, 110);
-
-			g.drawString("1", 687, 122 + 33);
-			g.drawString("2", 687, 167 + 33);
-			g.drawString("3", 687, 212 + 33);
-			g.drawString("4", 687, 257 + 33);
-			g.drawString("5", 687, 302 + 33);
-			g.drawString("6", 687, 347 + 33);
-			g.drawString("7", 687, 392 + 33);
-			g.drawString("8", 687, 437 + 33);
-			g.drawString("9", 687, 482 + 33);
-			g.drawString("10", 677, 527 + 33);
+			
+			DrawingUtils.drawGrid(g, 675, 75);
 
 			g.translate(675, 75);
+			
+			//Affiche les bateaux vivants du perdant sur la grille
 			for (int i = 0; i < loser.getBoats().size(); i++) {
 				Boat boat = loser.getBoats().get(i);
 
-				if (boat.isAlive()) {
-					g.setColor(new Color(51, 51, 51, 240));
-				} else {
-					g.setColor(new Color(151, 151, 151, 240));
-				}
-				String firstCase = boat.getCases().get(0);
-				String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-
-				int boatDirection = loser.getBoats().get(i).getDirection();
-
-				if (boatDirection == 1) {
-					g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45),
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45),
-							81 + (boat.getType().getSize() - 2) * 45, 36);
-				} else if (boatDirection == 2) {
-					g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45),
-							5 + (Integer.parseInt(firstCase.substring(1)) * 45), 36,
-							81 + (boat.getType().getSize() - 2) * 45);
-				} else if (boatDirection == 3) {
-					g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45),
-							81 + (boat.getType().getSize() - 2) * 45, 36);
-				} else if (boatDirection == 4) {
-					g.fillRect(5 + ((lastCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(lastCase.substring(1)) * 45),
-							36, 81 + (boat.getType().getSize() - 2) * 45);
-				}
+				g.setColor(new Color(51, 51, 51, 240));//Gris fonc�
+				
+				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
+				
+				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
+				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
+						(int) boatBounds.getHeight());
 			}
 
+			//Affiche les bateaux morts du perdant sur la grille
 			for (int i = 0; i < loser.getDeadBoats().size(); i++) {
-				g.setColor(new Color(151, 151, 151, 240));
-				if (!loser.getDeadBoats().get(i).isAlive()) {
-					Boat boat = loser.getDeadBoats().get(i);
-					if (boat.getDirection() == 1) {
-						g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
-								5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45),
-								81 + (boat.getType().getSize() - 2) * 45, 36);
-					} else if (boat.getDirection() == 2) {
-						g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
-								5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45), 36,
-								81 + (boat.getType().getSize() - 2) * 45);
-					} else if (boat.getDirection() == 3) {
-						g.fillRect(5 + ((boat.getCases().get(boat.getCases().size() - 1).charAt(0) - 64) * 45), 5
-								+ (Integer.parseInt(boat.getCases().get(boat.getCases().size() - 1).substring(1)) * 45),
-								81 + (boat.getType().getSize() - 2) * 45, 36);
-					} else if (boat.getDirection() == 4) {
-						g.fillRect(5 + ((boat.getCases().get(boat.getCases().size() - 1).charAt(0) - 64) * 45), 5
-								+ (Integer.parseInt(boat.getCases().get(boat.getCases().size() - 1).substring(1)) * 45),
-								36, 81 + (boat.getType().getSize() - 2) * 45);
-					}
-				}
+				
+				g.setColor(new Color(151, 151, 151, 240));//Gris clair
+				
+				Boat boat = loser.getDeadBoats().get(i);
+				
+				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
+				
+				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
+				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
+						(int) boatBounds.getHeight());
 			}
 
+			//Affiche les cases touch�es par l'ennemi
 			for (int i = 0; i < winner.getWinHistory().size(); i++) {
 				String cases = winner.getWinHistory().get(i);
+				
 				g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
 						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 			}
+			
+			//Affiche les cases dans l'eau de l'ennemi
 			for (int i = 0; i < winner.getFailHistory().size(); i++) {
 				String cases = winner.getFailHistory().get(i);
+				
 				g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
 						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 			}
+			
+			//Redeplace l'origine du dessin � sa position initiale
 			g.translate(-675, -75);
 		}
 
 	}
 
+	/**
+	 * @brief Gestion des évènement souris pressée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
-		System.out.println(mouseX + " " + mouseX);
-
 		if (!showingGrid) {
 			if (buttonOffset == 250) {
 				// On verifie si la position de la souris est dans le bouton
-				if (resultButton.contains(mouseX, mouseY))
-					resultButton.setPressed(true);
-				else
-					resultButton.setPressed(false);
-
-				if (menuButton.contains(mouseX, mouseY))
-					menuButton.setPressed(true);
-				else
-					menuButton.setPressed(false);
-
-				if (quitButton.contains(mouseX, mouseY))
-					quitButton.setPressed(true);
-				else
-					quitButton.setPressed(false);
+				resultButton.mousePressed(mouseX, mouseY);
+				menuButton.mousePressed(mouseX, mouseY);
+				quitButton.mousePressed(mouseX, mouseY);
 			}
 		} else {
 			if (continueButton.contains(mouseX, mouseY))
@@ -389,61 +316,46 @@ public class EndGameState extends State {
 			else
 				continueButton.setPressed(true);
 		}
-
 	}
 
+	/**
+	 * @brief Gestion des évènement souris relachée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		if (!showingGrid) {
 			if (buttonOffset == 250) {
-				if (resultButton.contains(mouseX, mouseY))
+				if (resultButton.mouseReleased(mouseX, mouseY))
 					showingGrid = true;
 
-				if (menuButton.contains(mouseX, mouseY)) {
+				if (menuButton.mouseReleased(mouseX, mouseY)) {
+					//Efface les joueurs pr�c�dents pour revenir au menu
 					stateManager.getCore().getPlayers().remove(1);
 					stateManager.getCore().getPlayers().remove(0);
-					/*stateManager.setSettupIndex(1);
-					stateManager.setCurrentPlayer(0);*/
 					stateManager.setCurrentState(new MenuState(stateManager));
 				}
 
-				if (quitButton.contains(mouseX, mouseY))
+				if (quitButton.mouseReleased(mouseX, mouseY))
 					System.exit(0);
 			}
 		} else {
-			if (continueButton.contains(mouseX, mouseY))
+			if (continueButton.mouseReleased(mouseX, mouseY))
 				showingGrid = false;
 		}
-		
-		continueButton.setPressed(false);
-		resultButton.setPressed(false);
-		menuButton.setPressed(false);
-		quitButton.setPressed(false);
 
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
+	public void keyPressed(KeyEvent e) {}
 }

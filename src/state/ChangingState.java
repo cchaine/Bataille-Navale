@@ -66,7 +66,7 @@ public class ChangingState extends State{
 		//Affiche le nom du joueur suivant
 		g.setColor(Color.WHITE);
 		g.setFont(AssetLoader.helvetica30);
-		g.drawString("C'est au tour de " + stateManager.getCurrentPlayer().getName() + "...", (int)(Display.width / 2 - g.getFontMetrics().getStringBounds("C'est au tour de " + stateManager.getCurrentPlayer().getName() + "...", g).getWidth() / 2), 200);
+		g.drawString("C'est au tour de " + stateManager.getCurrent().getName() + "...", (int)(Display.width / 2 - g.getFontMetrics().getStringBounds("C'est au tour de " + stateManager.getCurrent().getName() + "...", g).getWidth() / 2), 200);
 		
 		continueButton.render(g);
 	}
@@ -101,27 +101,15 @@ public class ChangingState extends State{
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyPressed(KeyEvent e) {}
 
 }

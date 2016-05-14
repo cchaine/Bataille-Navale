@@ -53,7 +53,7 @@ public class BoatButton {
 		}else {
 			g.setColor(new Color(0, 35, 102, 255));
 		}
-		g.fillRect((int)bounds.getX(), (int)(bounds.getY() - bounds.getHeight() /2), (int)bounds.getWidth(), (int)bounds.getHeight());
+		g.fillRect((int)bounds.getX(), (int)(bounds.getY() - bounds.getHeight() /2) , (int)bounds.getWidth(), (int)bounds.getHeight());
 		
 		g.setFont(AssetLoader.helvetica25);
 		if(textBound == null)

@@ -14,6 +14,7 @@ import core.BoatType;
 import core.Computer;
 import core.Player;
 import utils.AssetLoader;
+import utils.DrawingUtils;
 import graphics.Display;
 import gui.BoatButton;
 import gui.Button;
@@ -48,6 +49,7 @@ public class StartingState extends State {
 	private Button continueButton;
 
 	private int direction = 1;
+	private int changedDirection = 1;
 
 	private int mouseX, mouseY;
 
@@ -148,7 +150,7 @@ public class StartingState extends State {
 			g.drawString(errorMessage, 525, 25);
 		}
 
-		drawGrid(g);
+		DrawingUtils.drawGrid(g, 600, 42);
 
 		//Dessiné les bateaux déjà placés
 		for (int i = 0; i < boats.size(); i++) {
@@ -161,53 +163,9 @@ public class StartingState extends State {
 				g.setColor(new Color(0, 35, 102, 240));//Gris
 
 			Boat boat = boats.get(i);
-
-			String firstCase = boat.getCases().get(0);
-			String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-			int boatDirection = boats.get(i).getDirection();
 			
 			//Le rectangle représentant le bateau. A placer sur la grille
-			Rectangle2D boatBounds = null;
-
-			switch (boatDirection) {
-			case 1:
-				/* Le rectangle à des coordonnées précises :
-				 * Pour x:
-				 * 		-Déduit l'index de la colonne grâce à la table ASCII (La valeur du caractère soustrait à la valeur de A)
-				 * 		-Multiplie par 45 car chaque case fait 45 pixels
-				 * 		-Ajoute 600 car la grille est à 605 pixels en x
-				 * 		-Ajoute 5 car le rectangle à un léger offset
-				 * Pour y:
-				 * 		-Transforme la colonne alors stockée en String en un Integer
-				 * 		-Multiplie par 45 car chaque case fait 45 pixels
-				 * 		-Ajoute 66 car la grille est à 66 pixels en y
-				 * 		-Ajoute 5 car le rectangle à un léger offset
-				 * La largeur du bateau est égale à la largeur du torpilleur additionnée aux nombres de cases du bateau moins deux et multiplié par 45 (la taille d'une case)
-				 * L'épaisseur est de 36 pixels
-				 */
-				boatBounds = new Rectangle((firstCase.charAt(0) - 64) * 45 + 600 + 5,
-						(Integer.parseInt(firstCase.substring(1)) * 45) + 66 + 5,
-						81 + (boat.getType().getSize() - 2) * 45, 36);
-				break;
-
-			case 2:
-				boatBounds = new Rectangle(5 + ((firstCase.charAt(0) - 64) * 45) + 600,
-						(Integer.parseInt(firstCase.substring(1)) * 45) + 66 + 5, 37,
-						81 + (boat.getType().getSize() - 2) * 45);
-				break;
-
-			case 3:
-				boatBounds = new Rectangle((5 + ((lastCase.charAt(0) - 64) * 45)) + 600,
-						(Integer.parseInt(lastCase.substring(1)) * 45) + 66 + 5,
-						81 + (boat.getType().getSize() - 2) * 45, 36);
-				break;
-
-			case 4:
-				boatBounds = new Rectangle(5 + ((lastCase.charAt(0) - 64) * 45) + 600,
-						(Integer.parseInt(lastCase.substring(1)) * 45) + 66 + 5, 37,
-						81 + (boat.getType().getSize() - 2) * 45);
-				break;
-			}
+			Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
 
 			//Si la poubelle et que la sourie est dessus
 			if (trashButton.isActive() && boatBounds.contains(mouseX, mouseY))
@@ -235,148 +193,82 @@ public class StartingState extends State {
 	}
 
 	/**
-	 * @brief Dessine la grille de jeu
-	 * @details Affiche la grille et écrit les lettres
+	 * @brief Fait un rendu des rectangles fantomes à l'écran
+	 * @details En fonction de la position de la souris / bateau sélectionné, dessiner rectangle fantome
 	 * 
 	 * @param g		Objet utilitaire de dessin
 	 */
-	private void drawGrid(Graphics g) {
-		g.drawImage(AssetLoader.grid, 600, 42, null);
-		
-		g.setFont(AssetLoader.helvetica35);
-		g.setColor(new Color(0x333333, false));
-		g.drawString("A", 655, 77);
-		g.drawString("B", 700, 77);
-		g.drawString("C", 745, 77);
-		g.drawString("D", 790, 77);
-		g.drawString("E", 835, 77);
-		g.drawString("F", 881, 77);
-		g.drawString("G", 924, 77);
-		g.drawString("H", 970, 77);
-		g.drawString("I", 1022, 77);
-		g.drawString("J", 1063, 77);
-
-		g.drawString("1", 612, 122);
-		g.drawString("2", 612, 167);
-		g.drawString("3", 612, 212);
-		g.drawString("4", 612, 257);
-		g.drawString("5", 612, 302);
-		g.drawString("6", 612, 347);
-		g.drawString("7", 612, 392);
-		g.drawString("8", 612, 437);
-		g.drawString("9", 612, 482);
-		g.drawString("10", 602, 527);
-	}
-
 	public void mouseRender(Graphics g) {
 		BoatType type = null;
-		if (porteAvion.isActive()) {
+		
+		//Détermine le type de bateau qui est selectionné
+		if (porteAvion.isActive())
 			type = BoatType.PORTEAVION;
-		} else if (croiseur.isActive()) {
+		else if (croiseur.isActive())
 			type = BoatType.CROISEUR;
-		} else if (contreTorpilleur.isActive()) {
+		else if (contreTorpilleur.isActive())
 			type = BoatType.CONTRETORPILLEUR;
-		} else if (sousMarin.isActive()) {
+		else if (sousMarin.isActive())
 			type = BoatType.SOUSMARIN;
-		} else if (torpilleur.isActive()) {
+		else if (torpilleur.isActive())
 			type = BoatType.TORPILLEUR;
-		} else {
-			return;
-		}
+		else return;//Si aucun bateau n'est sélectionné, ne pas afficher de fantome
 
-		int direction = this.getDirection();
+		//Si le joueur a changé la direction, l'utiliser
+		if(direction != changedDirection)
+			direction = changedDirection;
+		
+		//Les coordonnées de la souris donc l'origine est en haut à gauche de la case A1
 		int gridX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
 		int gridY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
 
+		//Déplace l'origine du dessin en haut à gauche de la case A1
 		g.translate(600, 42);
 
 		int column;
 		int line;
 
-		if (gridX > 45 && gridX < 90) {
-			column = 1;
-		} else if (gridX > 90 && gridX < 135) {
-			column = 2;
-		} else if (gridX > 135 && gridX < 180) {
-			column = 3;
-		} else if (gridX > 180 && gridX < 225) {
-			column = 4;
-		} else if (gridX > 225 && gridX < 270) {
-			column = 5;
-		} else if (gridX > 270 && gridX < 315) {
-			column = 6;
-		} else if (gridX > 315 && gridX < 360) {
-			column = 7;
-		} else if (gridX > 360 && gridX < 405) {
-			column = 8;
-		} else if (gridX > 405 && gridX < 450) {
-			column = 9;
-		} else if (gridX > 450 && gridX < 495) {
-			column = 10;
-		} else {
+		//Récupère la colonne et la ligne en fonction de la position de la souris
+		column = guessCoords(gridX);
+		line = guessCoords(gridY);
+		if(column == 0 || line == 0)
 			return;
-		}
-
-		if (gridY > 45 && gridY < 90) {
-			line = 1;
-		} else if (gridY > 90 && gridY < 135) {
-			line = 2;
-		} else if (gridY > 135 && gridY < 180) {
-			line = 3;
-		} else if (gridY > 180 && gridY < 225) {
-			line = 4;
-		} else if (gridY > 225 && gridY < 270) {
-			line = 5;
-		} else if (gridY > 270 && gridY < 315) {
-			line = 6;
-		} else if (gridY > 315 && gridY < 360) {
-			line = 7;
-		} else if (gridY > 360 && gridY < 405) {
-			line = 8;
-		} else if (gridY > 405 && gridY < 450) {
-			line = 9;
-		} else if (gridY > 450 && gridY < 495) {
-			line = 10;
-		} else {
-			return;
-		}
-
-		int columnBuffer = column;
-		int lineBuffer = line;
 
 		switch (direction) {
 		case 1:
-			columnBuffer += type.getSize();
-			if (columnBuffer > 10) {
+			//Calcule la dernière case du bateau et vérifie qu'elle est dans la grille
+			if (column + type.getSize() - 1 > 10)
+				//Sinon le bateau ne rentre pas dans ce sens et donc l'inverser
 				this.setDirection(3);
-			}
 			break;
 
 		case 2:
-			lineBuffer += type.getSize();
-			if (lineBuffer > 10) {
+			if (line + type.getSize() - 1 > 10)
 				this.setDirection(4);
-			}
 			break;
 
 		case 3:
-			columnBuffer -= type.getSize();
-			if (columnBuffer < 1) {
+			if (column - type.getSize() + 1 < 1)
 				this.setDirection(1);
-			}
 			break;
 
 		case 4:
-			lineBuffer -= type.getSize();
-			if (lineBuffer < 1) {
+			if (line - type.getSize() + 1 < 1)
 				this.setDirection(2);
-			}
 			break;
 		}
 
 		g.setColor(new Color(22, 22, 22, 100));
+		
 		switch (direction) {
 		case 1:
+			/*
+			 * Pour x et y:
+			 * 		-Le rectangle à un leger offset de 5 pixels
+			 * 		-Chaque cases font 45 pixels
+			 * La longueur:
+			 * 		-longueur du torpilleur additionnée aux nombres de cases du bateau moins deux et multiplié par 45 (la taille d'une case)
+			 */
 			g.fillRect(5 + 45 * column, 5 + 45 * line, 81 + 45 * (type.getSize() - 2), 36);
 			break;
 
@@ -385,72 +277,44 @@ public class StartingState extends State {
 			break;
 
 		case 3:
+			//On enlève la taille du bateau au x pour qu'il apparaisse à gauche
 			g.fillRect(5 + 45 * column - (45 * (type.getSize() - 1)), 5 + 45 * line, 81 + 45 * (type.getSize() - 2),
 					36);
 			break;
 
 		case 4:
+			//On enlève la taille du bateau au y pour qu'il apparaisse en haut
 			g.fillRect(5 + 45 * column, 5 + 45 * line - (45 * (type.getSize() - 1)), 36,
 					81 + 45 * (type.getSize() - 2));
 			break;
 		}
+		
+		g.translate(-600, -42);
 	}
 
-	private void addBoat(int x, int y, BoatType type) {
+	/**
+	 * @brief Ajoute un bateau
+	 * @details Déduit de la position de la souris les coordonnées du bateau et l'ajoute
+	 * 
+	 * @param x		L'abscisse de la souris
+	 * @param y		L'ordonnée de la souris
+	 * @param type		Le type du bateau à ajouter
+	 */
+	private void addBoat(int gridX, int gridY, BoatType type) {
 		Boat boat = null;
-		String column = "";
-		String line = "";
+		int column;
+		int line;
 
-		if (x > 45 && x < 90) {
-			column = "A";
-		} else if (x > 90 && x < 135) {
-			column = "B";
-		} else if (x > 135 && x < 180) {
-			column = "C";
-		} else if (x > 180 && x < 225) {
-			column = "D";
-		} else if (x > 225 && x < 270) {
-			column = "E";
-		} else if (x > 270 && x < 315) {
-			column = "F";
-		} else if (x > 315 && x < 360) {
-			column = "G";
-		} else if (x > 360 && x < 405) {
-			column = "H";
-		} else if (x > 405 && x < 450) {
-			column = "I";
-		} else if (x > 450 && x < 495) {
-			column = "J";
-		} else {
+		//Récupère la colonne et la ligne en fonction de la position de la souris
+		column = guessCoords(gridX);
+		line = guessCoords(gridY);
+		if(column == 0 || line == 0)
 			return;
-		}
 
-		if (y > 45 && y < 90) {
-			line = "1";
-		} else if (y > 90 && y < 135) {
-			line = "2";
-		} else if (y > 135 && y < 180) {
-			line = "3";
-		} else if (y > 180 && y < 225) {
-			line = "4";
-		} else if (y > 225 && y < 270) {
-			line = "5";
-		} else if (y > 270 && y < 315) {
-			line = "6";
-		} else if (y > 315 && y < 360) {
-			line = "7";
-		} else if (y > 360 && y < 405) {
-			line = "8";
-		} else if (y > 405 && y < 450) {
-			line = "9";
-		} else if (y > 450 && y < 495) {
-			line = "10";
-		} else {
-			return;
-		}
+		//Crée un nouveau bateau à ces coordonnées (le x est la transformation de la column en une lettre ex: la colonne 1 doit etre A qui en ASCII est 65)
+		boat = new Boat(type,(char)(column + 64) + Integer.toString(line), direction);
 
-		boat = new Boat(type, column + line, direction);
-
+		//On verrifie que aucun bateau n'est déjà la
 		for (int i = 0; i < boats.size(); i++) {
 			for (int j = 0; j < boat.getCases().size(); j++) {
 				if (boats.get(i).isOnCase(boat.getCases().get(j))) {
@@ -461,11 +325,13 @@ public class StartingState extends State {
 		}
 
 		boats.add(boat);
+		
+		//Marque le bouton du bateau comme utilisé
 		switch (boat.getType()) {
 		case PORTEAVION:
 			porteAvion.setUsed(true);
 			break;
-
+			
 		case CROISEUR:
 			croiseur.setUsed(true);
 			break;
@@ -483,9 +349,47 @@ public class StartingState extends State {
 			break;
 		}
 	}
+	
+	/**
+	 * @brief Transforme une coordonnée en un index
+	 *
+	 * @param coord		La coordonnée à transformer
+	 * @return		Renvoi l'index
+	 */
+	public int guessCoords(int coord)
+	{
+		//Vérifie la position de la souris et détermine dans quelle colonne ou ligne elle est (une case fait 45 pixels) 
+		if (coord > 45 && coord < 90)
+			return 1;
+		else if (coord > 90 && coord < 135)
+			return 2;
+		else if (coord > 135 && coord < 180)
+			return 3;
+		else if (coord > 180 && coord < 225)
+			return 4;
+		else if (coord > 225 && coord < 270)
+			return 5;
+		else if (coord > 270 && coord < 315)
+			return 6;
+		else if (coord > 315 && coord < 360)
+			return 7;
+		else if (coord > 360 && coord < 405)
+			return 8;
+		else if (coord > 405 && coord < 450)
+			return 9;
+		else if (coord > 450 && coord < 495)
+			return 10;
+		else return 0;
+	}
 
+	/**
+	 * @brief Gestion des évènement souris pressée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
+		//Mise a jour des boutons
 		randomButton.mousePressed(mouseX, mouseY);
 		trashButton.mousePressed(mouseX, mouseY);
 		
@@ -495,11 +399,18 @@ public class StartingState extends State {
 			continueButton.mousePressed(mouseX, mouseY);
 	}
 
+	/**
+	 * @brief Gestion des évènement souris relachée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		//Les coordonnées de la souris avec l'origine en haut à gauche de la case A1
 		int gridX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
 		int gridY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
-
+		
+		//Si la souris est dans la grille et que un bouton de bateau est actif, ajouter un bateau avec le type correspondant
 		if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && porteAvion.isActive())
 			addBoat(gridX, gridY, BoatType.PORTEAVION);
 		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && croiseur.isActive())
@@ -511,6 +422,7 @@ public class StartingState extends State {
 		else if ((gridX > 0 && gridX < 1096 && gridY > 0 && gridY < 538) && torpilleur.isActive())
 			addBoat(gridX, gridY, BoatType.TORPILLEUR);
 
+		//Met a jour les boutons
 		porteAvion.mouseReleased(mouseX, mouseY);
 		croiseur.mouseReleased(mouseX, mouseY);
 		contreTorpilleur.mouseReleased(mouseX, mouseY);
@@ -518,7 +430,10 @@ public class StartingState extends State {
 		torpilleur.mouseReleased(mouseX, mouseY);
 
 		if (randomButton.contains(mouseX, mouseY)) {
+			//Crée des bateaux aléatoirement
 			boats = Computer.generateBoatRandom();
+			
+			//Défini les boutons de bateau comme usés
 			porteAvion.setUsed(true);
 			croiseur.setUsed(true);
 			contreTorpilleur.setUsed(true);
@@ -529,6 +444,7 @@ public class StartingState extends State {
 
 		if (trashButton.contains(mouseX, mouseY))
 			trashButton.setActive(true);
+		//Si la souris clique en dehors de la grille, desactiver la poubelle
 		else if (!(gridX > 45 && gridX < 495 && gridY > 45 && gridY < 495)) {
 			trashButton.setActive(false);
 			trashButton.setPressed(false);
@@ -537,51 +453,14 @@ public class StartingState extends State {
 		if (trashButton.isActive()) {
 			for (int i = 0; i < boats.size(); i++) {
 				Boat boat = boats.get(i);
-				int boatsSizeBefore = boats.size();
 
-				String firstCase = boat.getCases().get(0);
-				String lastCase = boat.getCases().get(boat.getCases().size() - 1);
-				int boatDirection = boats.get(i).getDirection();
-
-				switch (boatDirection) {
-				case 1:
-					if (mouseX > (firstCase.charAt(0) - 64) * 45 + 605
-							&& mouseX < (firstCase.charAt(0) - 64) * 45 + 605 + 81 + (boat.getType().getSize() - 2) * 45
-							&& mouseY > 66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45)
-							&& mouseY < 66 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 36) {
-						boats.remove(i);
-					}
-					break;
-
-				case 2:
-					if (mouseX > 5 + ((firstCase.charAt(0) - 64) * 45) + 600
-							&& mouseX < 5 + ((firstCase.charAt(0) - 64) * 45) + 600 + 37
-							&& mouseY > 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45)
-							&& mouseY < 67 + 5 + (Integer.parseInt(firstCase.substring(1)) * 45) + 81 + (boat.getType().getSize() - 2) * 45) {
-						boats.remove(i);
-					}
-					break;
-
-				case 3:
-					if (mouseX > (5 + ((lastCase.charAt(0) - 64) * 45)) + 600
-							&& mouseX < (5 + ((lastCase.charAt(0) - 64) * 45)) + 600 + 81 + (boat.getType().getSize() - 2) * 45
-							&& mouseY > 66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45))
-							&& mouseY < 66 + (5 + (Integer.parseInt(lastCase.substring(1)) * 45)) + 36) {
-						boats.remove(i);
-					}
-					break;
-
-				case 4:
-					if (mouseX > 5 + ((lastCase.charAt(0) - 64) * 45) + 600
-							&& mouseX < 5 + ((lastCase.charAt(0) - 64) * 45) + 600 + 37
-							&& mouseY > 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45)
-							&& mouseY < 67 + 5 + (Integer.parseInt(lastCase.substring(1)) * 45) + 81 + (boat.getType().getSize() - 2) * 45) {
-						boats.remove(i);
-					}
-					break;
-				}
-
-				if (boatsSizeBefore > boats.size()) {
+				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
+				
+				//Si la souris est a l'intérieur du rectangle du bateau, le supprimer
+				if (boatBounds.contains(mouseX, mouseY)){
+					boats.remove(i);
+					
+					//Réactive le bouton du type supprimé
 					switch (boat.getType()) {
 					case PORTEAVION:
 						porteAvion.setUsed(false);
@@ -607,6 +486,7 @@ public class StartingState extends State {
 			}
 		}
 		
+		//Si tous les bateaux sont placés
 		if(boats.size() == 5){
 			if(continueButton.mouseReleased(mouseX, mouseY))
 			{
@@ -615,6 +495,8 @@ public class StartingState extends State {
 					errorMessage = "Veuillez entrer votre nom...";
 					return;
 				}
+				
+				//Si il y a déjà un joueur créé et que on est en multijoueur, vérifier que le nouveau n'a pas le même nom
 				if(stateManager.getMultiplayer() && !stateManager.getCore().getPlayers().isEmpty())
 				{
 					if(stateManager.getCore().getPlayers().get(0).getName().equals(nameField.getText())){
@@ -625,6 +507,7 @@ public class StartingState extends State {
 				
 				stateManager.getCore().getPlayers().add(new Player(nameField.getText(), boats));
 				
+				//Si en multijoueur et que seulement un joueur enregistré (le nouveau), recréer un joueur
 				if(stateManager.getCore().getPlayers().size() == 1 && stateManager.getMultiplayer())
 				{
 					stateManager.setCurrentState(new StartingState(stateManager));
@@ -633,65 +516,65 @@ public class StartingState extends State {
 					if(stateManager.getMultiplayer())
 					{
 						stateManager.setCurrent(stateManager.getCore().getPlayers().get(0));
+						stateManager.setOpponent(stateManager.getCore().getPlayers().get(1));
+						
+						//Crée l'état changement de joueur, car sinon le dernier voit le jeu du premier
 						stateManager.setCurrentState(new ChangingState(stateManager));
 					}else{
-						stateManager.setCurrent(stateManager.getCore().getPlayers().get(1));
 						stateManager.setCurrentState(new PlayState(stateManager));
-						
 					}
 				}
 			}
 		}
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-	}
-
+	
+	/**
+	 * @brief Gestion des évènements de touche appuyée
+	 * 
+	 * @param e		Information sur l'évènement
+	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (nameField.isActive()) {
-			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER)
 				nameField.setActive(false);
-			}
 
 			int keyCode = e.getKeyCode();
+			//Si les lettres sont entre a et z et entre A et Z (ASCII) et que le texte fait pas plus de 22 caractères
 			if ((keyCode >= 65 && keyCode <= 90 || keyCode >= 97 && keyCode <= 122)
-					&& nameField.getText().length() < 22) {
+					&& nameField.getText().length() < 22)
 				nameField.addLetter(e.getKeyChar());
-			}
-			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !nameField.getText().isEmpty()) {
+			
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !nameField.getText().isEmpty())
 				nameField.backspace();
-			}
 		}
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			direction = 2;
-		}
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			direction = 3;
-		}
-		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			direction = 4;
-		}
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			direction = 1;
-		}
+		
+		//Change la direction avec les flèches
+		if (e.getKeyCode() == KeyEvent.VK_DOWN)
+			changedDirection = 2;
+		if (e.getKeyCode() == KeyEvent.VK_LEFT)
+			changedDirection = 3;
+		if (e.getKeyCode() == KeyEvent.VK_UP)
+			changedDirection = 4;
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT)
+			changedDirection = 1;
 	}
-
+	
 	public int getDirection() {
 		return direction;
 	}
 
 	public void setDirection(int direction) {
 		this.direction = direction;
+		this.changedDirection = direction;
 	}
+	
+	@Override
+	public void mouseClicked(MouseEvent e) {}
 
+	@Override
+	public void keyTyped(KeyEvent e) {}
+
+	@Override
+	public void keyReleased(KeyEvent e) {}
 }

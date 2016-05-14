@@ -28,9 +28,6 @@ public class PlayState extends State {
 	private float disparitionErreur = 1;
 	private int boatLeft = 5;
 
-	private Player currentPlayer;
-	private Player opponentPlayer;
-
 	private StateManager stateManager;
 
 	private int x, y;
@@ -39,12 +36,6 @@ public class PlayState extends State {
 
 	public PlayState(StateManager stateManager) {
 		this.stateManager = stateManager;
-		currentPlayer = stateManager.getCurrentPlayer();
-		if (stateManager.getCurrentPlayer() == null) {
-			opponentPlayer = stateManager.getCore().getPlayers().get(1);
-		} else {
-			opponentPlayer = stateManager.getCore().getPlayers().get(0);
-		}
 	}
 
 	@Override
@@ -61,8 +52,8 @@ public class PlayState extends State {
 		y = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y;
 			mouseX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 676;
 			mouseY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 99;
-		boatLeft = opponentPlayer.getBoats().size();
-		if (opponentPlayer.getBoats().size() == 0) {
+		boatLeft = stateManager.getOpponent().getBoats().size();
+		if (stateManager.getOpponent().getBoats().size() == 0) {
 			fired = true;
 		}
 	}
@@ -72,8 +63,8 @@ public class PlayState extends State {
 		g.setColor(new Color(0, 35, 102, 240));
 		g.setFont(AssetLoader.helvetica25);
 		metrics = g.getFontMetrics();
-		nameMetrics = metrics.getStringBounds(currentPlayer.getName(), g);
-		g.drawString(currentPlayer.getName(), (int) (600 - nameMetrics.getWidth() / 2), 40);
+		nameMetrics = metrics.getStringBounds(stateManager.getCurrent().getName(), g);
+		g.drawString(stateManager.getCurrent().getName(), (int) (600 - nameMetrics.getWidth() / 2), 40);
 		g.setFont(AssetLoader.helvetica20);
 		g.drawString("Bateaux Adverses Restants : " + Integer.toString(boatLeft), 717, 40);
 
@@ -103,8 +94,8 @@ public class PlayState extends State {
 		g.drawString("10", 31, 527 + 33);
 
 		g.translate(29, 75);
-		for (int i = 0; i < currentPlayer.getBoats().size(); i++) {
-			Boat boat = currentPlayer.getBoats().get(i);
+		for (int i = 0; i < stateManager.getCurrent().getBoats().size(); i++) {
+			Boat boat = stateManager.getCurrent().getBoats().get(i);
 
 			if (boat.isAlive()) {
 				g.setColor(new Color(51, 51, 51, 240));
@@ -114,7 +105,7 @@ public class PlayState extends State {
 			String firstCase = boat.getCases().get(0);
 			String lastCase = boat.getCases().get(boat.getCases().size() - 1);
 
-			int boatDirection = currentPlayer.getBoats().get(i).getDirection();
+			int boatDirection = stateManager.getCurrent().getBoats().get(i).getDirection();
 
 			if (boatDirection == 1) {
 				g.fillRect(5 + ((firstCase.charAt(0) - 64) * 45), 5 + (Integer.parseInt(firstCase.substring(1)) * 45),
@@ -131,10 +122,10 @@ public class PlayState extends State {
 			}
 		}
 
-		for (int i = 0; i < currentPlayer.getDeadBoats().size(); i++) {
+		for (int i = 0; i < stateManager.getCurrent().getDeadBoats().size(); i++) {
 			g.setColor(new Color(151, 151, 151, 240));
-			if (!currentPlayer.getDeadBoats().get(i).isAlive()) {
-				Boat boat = currentPlayer.getDeadBoats().get(i);
+			if (!stateManager.getCurrent().getDeadBoats().get(i).isAlive()) {
+				Boat boat = stateManager.getCurrent().getDeadBoats().get(i);
 				if (boat.getDirection() == 1) {
 					g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
 							5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45),
@@ -155,13 +146,13 @@ public class PlayState extends State {
 			}
 		}
 
-		for (int i = 0; i < opponentPlayer.getWinHistory().size(); i++) {
-			String cases = opponentPlayer.getWinHistory().get(i);
+		for (int i = 0; i < stateManager.getOpponent().getWinHistory().size(); i++) {
+			String cases = stateManager.getOpponent().getWinHistory().get(i);
 			g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
 					4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 		}
-		for (int i = 0; i < opponentPlayer.getFailHistory().size(); i++) {
-			String cases = opponentPlayer.getFailHistory().get(i);
+		for (int i = 0; i < stateManager.getOpponent().getFailHistory().size(); i++) {
+			String cases = stateManager.getOpponent().getFailHistory().get(i);
 			g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
 					4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 		}
@@ -193,10 +184,10 @@ public class PlayState extends State {
 		g.drawString("10", 677, 527 + 33);
 
 		g.translate(675, 75);
-		for (int i = 0; i < opponentPlayer.getDeadBoats().size(); i++) {
+		for (int i = 0; i < stateManager.getOpponent().getDeadBoats().size(); i++) {
 			g.setColor(new Color(151, 151, 151, 240));
-			if (!opponentPlayer.getDeadBoats().get(i).isAlive()) {
-				Boat boat = opponentPlayer.getDeadBoats().get(i);
+			if (!stateManager.getOpponent().getDeadBoats().get(i).isAlive()) {
+				Boat boat = stateManager.getOpponent().getDeadBoats().get(i);
 				if (boat.getDirection() == 1) {
 					g.fillRect(5 + ((boat.getCases().get(0).charAt(0) - 64) * 45),
 							5 + (Integer.parseInt(boat.getCases().get(0).substring(1)) * 45),
@@ -217,13 +208,13 @@ public class PlayState extends State {
 			}
 		}
 
-		for (int i = 0; i < currentPlayer.getWinHistory().size(); i++) {
-			String cases = currentPlayer.getWinHistory().get(i);
+		for (int i = 0; i < stateManager.getCurrent().getWinHistory().size(); i++) {
+			String cases = stateManager.getCurrent().getWinHistory().get(i);
 			g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
 					4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 		}
-		for (int i = 0; i < currentPlayer.getFailHistory().size(); i++) {
-			String cases = currentPlayer.getFailHistory().get(i);
+		for (int i = 0; i < stateManager.getCurrent().getFailHistory().size(); i++) {
+			String cases = stateManager.getCurrent().getFailHistory().get(i);
 			g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
 					4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
 		}
@@ -305,7 +296,7 @@ public class PlayState extends State {
 			}
 
 			if (!currentTarget.isEmpty()) {
-				if (!currentPlayer.alreadyPlayed(currentTarget)) {
+				if (!stateManager.getCurrent().alreadyPlayed(currentTarget)) {
 					g.drawImage(AssetLoader.scope, 5 + ((currentTarget.charAt(0) - 64) * 45),
 							5 + (Integer.parseInt(currentTarget.substring(1)) * 45), 36, 36, null);
 				} else {
@@ -352,12 +343,12 @@ public class PlayState extends State {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		if (x > 551 && x < 650 && y > 123 && y < 224 && fired) {
-			if (opponentPlayer.getBoats().size() == 0) {
-				currentPlayer.setWinner(true);
+			if (stateManager.getOpponent().getBoats().size() == 0) {
+				stateManager.getCurrent().setWinner(true);
 				stateManager.setCurrentState(new EndGameState(stateManager));
 			} else if (stateManager.getMultiplayer()) {
-				//stateManager.setCurrentPlayer(1);
-				opponentPlayer.play(stateManager);
+				//stateManager.setstateManager.getCurrent()(1);
+				stateManager.getOpponent().play(stateManager);
 				if (stateManager.getCore().getPlayers().get(0).getDeadBoats().size() == 5) {
 					stateManager.setCurrentState(new EndGameState(stateManager));
 				} else {

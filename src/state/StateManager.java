@@ -19,7 +19,7 @@ public class StateManager {
 	private Player current;
 	private Player opponent;
 
-	private boolean multiplayer = true;
+	private boolean multiplayer = false;
 
 	/**
 	 * @briefConstructeur
@@ -34,7 +34,7 @@ public class StateManager {
 	 * @brief Initialise les variables une fois le jeu lancé
 	 */
 	public void init() {
-		currentState = new StartingState(this);
+		currentState = new MenuState(this);
 	}
 
 	/**
@@ -119,16 +119,21 @@ public class StateManager {
 		return core;
 	}
 
-	public Player getCurrentPlayer() {
+	public Player getCurrent() {
 		return current;
 	}
 
-	public Player getOpponentPlayer() {
+	public Player getOpponent() {
 		return opponent;
 	}
 
 	public void setCurrent(Player current) {
 		this.current = current;
+	}
+	
+	public void setOpponent(Player opponent)
+	{
+		this.opponent = opponent;
 	}
 
 	public boolean getMultiplayer() {

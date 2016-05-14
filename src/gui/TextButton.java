@@ -48,6 +48,21 @@ public class TextButton {
 		else
 			g.drawString(normal, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2 - 10));
 	}
+	
+	public void mousePressed(int mouseX, int mouseY)
+	{
+		if (bounds.contains(mouseX, mouseY))
+			isPressed = true;
+		else
+			isPressed = false;
+	}
+	
+	public boolean mouseReleased(int mouseX, int mouseY)
+	{
+		isPressed = false;
+		return bounds.contains(mouseX, mouseY);
+		
+	}
 
 	public boolean isPressed() {
 		return isPressed;
