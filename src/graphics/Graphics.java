@@ -1,5 +1,7 @@
 package graphics;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferStrategy;
 import state.StateManager;
 
@@ -59,6 +61,13 @@ public class Graphics{
 	public void render()
 	{
 		g = bufferStrategy.getDrawGraphics(); //Récupère l'objet permettant de dessiner
+		
+		//Active l'antialiasing du texte
+		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+		
+		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
 		
 		g.clearRect(0, 0, Display.width, Display.height); //Efface l'image précédente pour dessiner la nouvelle
 		

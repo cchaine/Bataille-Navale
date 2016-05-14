@@ -5,9 +5,7 @@ import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 
-import core.Boat;
 import core.Player;
 import utils.AssetLoader;
 import utils.DrawingUtils;
@@ -191,109 +189,26 @@ public class EndGameState extends State {
 
 			continueButton.render(g);
 
-			DrawingUtils.drawGrid(g, 29, 75);
-
-			//Déplace l'origine du dessin en haut à gauche de A1 de la grille de gauche
+			//Déplace l'origine du dessin aux coordonnées de la grille à dessiner
 			g.translate(29, 75);
 			
-			//Affiche les bateaux vivants du gagnant sur la grille
-			for (int i = 0; i < winner.getBoats().size(); i++) {
-				Boat boat = winner.getBoats().get(i);
+			//Dessine la grille
+			DrawingUtils.drawGrid(g);
+			//Dessine les bateaux et l'historique des tirs dessus
+			DrawingUtils.drawGridItems(g, winner, loser);
 
-				g.setColor(new Color(51, 51, 51, 240));//Gris fonc�
-				
-				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
-				
-				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
-				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
-						(int) boatBounds.getHeight());
-			}
-
-			//Affiche les bateaux morts du gagnant sur la grille
-			for (int i = 0; i < winner.getDeadBoats().size(); i++) {
-				
-				g.setColor(new Color(151, 151, 151, 240));//Gris clair
-				
-				Boat boat = winner.getDeadBoats().get(i);
-				
-				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
-				
-				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
-				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
-						(int) boatBounds.getHeight());
-			}
-
-			//Affiche les cases touch�es par l'ennemi
-			for (int i = 0; i < loser.getWinHistory().size(); i++) {
-				String cases = loser.getWinHistory().get(i);
-				
-				g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
-						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
-			}
-			
-			//Affiche les cases dans l'eau de l'ennemi
-			for (int i = 0; i < loser.getFailHistory().size(); i++) {
-				String cases = loser.getFailHistory().get(i);
-				
-				g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
-						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
-			}
-
-			//Red�place l'origine du rep�re � sa position initiale
+			//Red�place l'origine du rep�re � sa position initiale
 			g.translate(-29, -75);
 
-			
-			DrawingUtils.drawGrid(g, 675, 75);
-
+			//Déplace l'origine du dessin aux coordonnées de la grille à dessiner
 			g.translate(675, 75);
 			
-			//Affiche les bateaux vivants du perdant sur la grille
-			for (int i = 0; i < loser.getBoats().size(); i++) {
-				Boat boat = loser.getBoats().get(i);
-
-				g.setColor(new Color(51, 51, 51, 240));//Gris fonc�
-				
-				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
-				
-				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
-				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
-						(int) boatBounds.getHeight());
-			}
-
-			//Affiche les bateaux morts du perdant sur la grille
-			for (int i = 0; i < loser.getDeadBoats().size(); i++) {
-				
-				g.setColor(new Color(151, 151, 151, 240));//Gris clair
-				
-				Boat boat = loser.getDeadBoats().get(i);
-				
-				Rectangle2D boatBounds = DrawingUtils.generateBoatBounds(boat);
-				
-				//Dessine le bateau aux coordonnées précédentes, en enlevant la position de la grille, car l'origine du dessin est déplacé
-				g.fillRect((int) (boatBounds.getX()) - 600, (int) (boatBounds.getY()) - 66, (int) boatBounds.getWidth(),
-						(int) boatBounds.getHeight());
-			}
-
-			//Affiche les cases touch�es par l'ennemi
-			for (int i = 0; i < winner.getWinHistory().size(); i++) {
-				String cases = winner.getWinHistory().get(i);
-				
-				g.drawImage(AssetLoader.fire, 3 + ((cases.charAt(0) - 64) * 45),
-						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
-			}
+			DrawingUtils.drawGrid(g);
+			DrawingUtils.drawGridItems(g, loser, winner);
 			
-			//Affiche les cases dans l'eau de l'ennemi
-			for (int i = 0; i < winner.getFailHistory().size(); i++) {
-				String cases = winner.getFailHistory().get(i);
-				
-				g.drawImage(AssetLoader.water, 3 + ((cases.charAt(0) - 64) * 45),
-						4 + (Integer.parseInt(cases.substring(1)) * 45), 39, 39, null);
-			}
-			
-			//Redeplace l'origine du dessin � sa position initiale
+			//Redeplace l'origine du dessin � sa position initiale
 			g.translate(-675, -75);
 		}
-
 	}
 
 	/**
@@ -331,7 +246,7 @@ public class EndGameState extends State {
 					showingGrid = true;
 
 				if (menuButton.mouseReleased(mouseX, mouseY)) {
-					//Efface les joueurs pr�c�dents pour revenir au menu
+					//Efface les joueurs pr�c�dents pour revenir au menu
 					stateManager.getCore().getPlayers().remove(1);
 					stateManager.getCore().getPlayers().remove(0);
 					stateManager.setCurrentState(new MenuState(stateManager));

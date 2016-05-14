@@ -1,9 +1,13 @@
 package utils;
 
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JProgressBar;
+
+import com.sun.org.apache.bcel.internal.generic.INEG;
 
 import sun.applet.Main;
 
@@ -61,43 +65,38 @@ public class AssetLoader {
 	 */
 	
 	public static void loadAssets(JProgressBar progressBar) {
-		boat = ImageLoader.loadImage("/textures/military.png");
+	    boat = scaleImage(ImageLoader.loadImage("/textures/military.png"), 800, 400);
+	    
 		progressBar.setValue(progressBar.getValue() + 2); //Incrémentation de la barre de progression de 2
 		waves = ImageLoader.loadImage("/textures/waves.png");
 		progressBar.setValue(progressBar.getValue() + 2);
 		grid = ImageLoader.loadImage("/textures/fullGrid.png");
 		progressBar.setValue(progressBar.getValue() + 2);
-		trash = ImageLoader.loadImage("/textures/recycle.png");
+		trash = scaleImage(ImageLoader.loadImage("/textures/recycle.png"), 140, 140);
 		progressBar.setValue(progressBar.getValue() + 2);
-		trashClickedImg = ImageLoader.loadImage("/textures/recycleClicked.png");
+		trashClickedImg = scaleImage(ImageLoader.loadImage("/textures/recycleClicked.png"), 140, 185);
 		progressBar.setValue(progressBar.getValue() + 2);
-		trashPressedImg = ImageLoader.loadImage("/textures/recyclePressed.png");
+		trashPressedImg = scaleImage(ImageLoader.loadImage("/textures/recyclePressed.png"), 140, 140);
 		progressBar.setValue(progressBar.getValue() + 2);
 		delete = ImageLoader.loadImage("/textures/delete.png");
 		progressBar.setValue(progressBar.getValue() + 2);
-		continueButton = ImageLoader.loadImage("/textures/addButton.png");
+		continueButton = scaleImage(ImageLoader.loadImage("/textures/addButton.png"), 125, 125);
 		progressBar.setValue(progressBar.getValue() + 2);
-		continueButtonPressed = ImageLoader.loadImage("/textures/addButtonPressed.png");
+		continueButtonPressed = scaleImage(ImageLoader.loadImage("/textures/addButtonPressed.png"), 125, 125);
 		progressBar.setValue(progressBar.getValue() + 2);
-		continueButtonHovered = ImageLoader.loadImage("/textures/addButtonHovered.png");
+		continueButtonHovered = scaleImage(ImageLoader.loadImage("/textures/addButtonHovered.png"), 125, 125);
+		progressBar.setValue(progressBar.getValue() + 10);
+		fireButton = scaleImage(ImageLoader.loadImage("/textures/fireButton.png"), 200, 200);
 		progressBar.setValue(progressBar.getValue() + 2);
-		attackButton = ImageLoader.loadImage("/textures/attackButton.png");
+		fireButtonHovered = scaleImage(ImageLoader.loadImage("/textures/fireButtonHovered.png"), 200, 200);
 		progressBar.setValue(progressBar.getValue() + 2);
-		attackButtonHovered = ImageLoader.loadImage("/textures/attackButtonHovered.png");
+		fireButtonPressed = scaleImage(ImageLoader.loadImage("/textures/fireButtonPressed.png"), 200, 200);
 		progressBar.setValue(progressBar.getValue() + 2);
-		attackButtonPressed = ImageLoader.loadImage("/textures/attackButtonPressed.png");
+		scope = scaleImage(ImageLoader.loadImage("/textures/scope.png"), 70, 70);
 		progressBar.setValue(progressBar.getValue() + 2);
-		fireButton = ImageLoader.loadImage("/textures/fireButton.png");
+		fire = scaleImage(ImageLoader.loadImage("/textures/fire.png"), 80, 80);
 		progressBar.setValue(progressBar.getValue() + 2);
-		fireButtonHovered = ImageLoader.loadImage("/textures/fireButtonHovered.png");
-		progressBar.setValue(progressBar.getValue() + 2);
-		fireButtonPressed = ImageLoader.loadImage("/textures/fireButtonPressed.png");
-		progressBar.setValue(progressBar.getValue() + 2);
-		scope = ImageLoader.loadImage("/textures/scope.png");
-		progressBar.setValue(progressBar.getValue() + 2);
-		fire = ImageLoader.loadImage("/textures/fire.png");
-		progressBar.setValue(progressBar.getValue() + 2);
-		water = ImageLoader.loadImage("/textures/water2.png");
+		water = scaleImage(ImageLoader.loadImage("/textures/water2.png"), 80, 80);
 		progressBar.setValue(progressBar.getValue() + 2);
 		
 		//Création d'une police si 
@@ -127,12 +126,24 @@ public class AssetLoader {
 		errorFont = new Font("Helvetica", Font.BOLD, 15);
 		progressBar.setValue(progressBar.getValue() + 2);
 		
-		randomButton = ImageLoader.loadImage("/textures/rdmButton.png");
+		randomButton = scaleImage(ImageLoader.loadImage("/textures/rdmButton.png"), 125, 125);
 		progressBar.setValue(progressBar.getValue() + 2);
+		//randomButtonHovered = scaleImage(ImageLoader.loadImage("/textures/rdmButtonHovered.png"), 125, 125);
 		randomButtonHovered = ImageLoader.loadImage("/textures/rdmButtonHovered.png");
 		progressBar.setValue(progressBar.getValue() + 2);
-		randomButtonPressed = ImageLoader.loadImage("/textures/rdmButtonPressed.png");
+		randomButtonPressed = scaleImage(ImageLoader.loadImage("/textures/rdmButtonPressed.png"), 125, 125);
 		progressBar.setValue(progressBar.getValue() + 2);
+	}
+	
+	private static BufferedImage scaleImage(BufferedImage source, int width, int height)
+	{
+		Image tmp = source.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+	    BufferedImage dimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+	    Graphics2D g2d = dimg.createGraphics();
+	    g2d.drawImage(tmp, 0, 0, null);
+	    g2d.dispose();
+	    return dimg;
 	}
 
 }

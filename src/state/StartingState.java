@@ -3,7 +3,6 @@ package state;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -72,7 +71,7 @@ public class StartingState extends State {
 
 		nameField = new TextField(48, 72, 515, 114);
 
-		randomButton = new Button(1145, 518, 60, 60, AssetLoader.randomButton, AssetLoader.randomButtonHovered,
+		randomButton = new Button(1145, 525, 60, 60, AssetLoader.randomButton, AssetLoader.randomButtonHovered,
 				AssetLoader.randomButtonPressed);
 		trashButton = new TriStateButton(555, 518, 70, 70, AssetLoader.trash, AssetLoader.trashClickedImg,
 				AssetLoader.trashPressedImg);
@@ -150,13 +149,14 @@ public class StartingState extends State {
 			g.drawString(errorMessage, 525, 25);
 		}
 
-		DrawingUtils.drawGrid(g, 600, 42);
+		//Déplace l'origine du dessin aux coordonnées de la grille
+		g.translate(600, 42);
+		
+		//Dessine la grille
+		DrawingUtils.drawGrid(g);
 
 		//Dessiné les bateaux déjà placés
 		for (int i = 0; i < boats.size(); i++) {
-			//Déplace l'origine du dessin en haut à gauche de la grille
-			g.translate(600, 42);
-
 			if (trashButton.isActive())
 				g.setColor(new Color(232, 47, 53, 240));//Rouge
 			else
@@ -179,10 +179,10 @@ public class StartingState extends State {
 				//Dessine un croix
 				g.drawImage(AssetLoader.delete, (int) (boatBounds.getX() - 600 + boatBounds.getWidth() / 2 - 15),
 						(int) (boatBounds.getY() - 66 + boatBounds.getHeight() / 2 - 15), 30, 30, null);
-
-			//Redéplace l'origine du dessin à sa position précédente
-			g.translate(-600, -42);
 		}
+		
+		//Redéplace l'origine du dessin à sa position précédente
+		g.translate(-600, -42);
 
 		//Si tous les bateaux sont placés ont peut continuer
 		if (boats.size() == 5) {
@@ -218,7 +218,7 @@ public class StartingState extends State {
 		if(direction != changedDirection)
 			direction = changedDirection;
 		
-		//Les coordonnées de la souris donc l'origine est en haut à gauche de la case A1
+		//Les coordonnées de la souris dont l'origine est en haut à gauche de la case A1
 		int gridX = MouseInfo.getPointerInfo().getLocation().x - Display.frame.getLocationOnScreen().x - 601;
 		int gridY = MouseInfo.getPointerInfo().getLocation().y - Display.frame.getLocationOnScreen().y - 66;
 
@@ -229,8 +229,8 @@ public class StartingState extends State {
 		int line;
 
 		//Récupère la colonne et la ligne en fonction de la position de la souris
-		column = guessCoords(gridX);
-		line = guessCoords(gridY);
+		column = DrawingUtils.guessCoords(gridX);
+		line = DrawingUtils.guessCoords(gridY);
 		if(column == 0 || line == 0)
 			return;
 
@@ -306,8 +306,8 @@ public class StartingState extends State {
 		int line;
 
 		//Récupère la colonne et la ligne en fonction de la position de la souris
-		column = guessCoords(gridX);
-		line = guessCoords(gridY);
+		column = DrawingUtils.guessCoords(gridX);
+		line = DrawingUtils.guessCoords(gridY);
 		if(column == 0 || line == 0)
 			return;
 
@@ -348,38 +348,6 @@ public class StartingState extends State {
 			torpilleur.setUsed(true);
 			break;
 		}
-	}
-	
-	/**
-	 * @brief Transforme une coordonnée en un index
-	 *
-	 * @param coord		La coordonnée à transformer
-	 * @return		Renvoi l'index
-	 */
-	public int guessCoords(int coord)
-	{
-		//Vérifie la position de la souris et détermine dans quelle colonne ou ligne elle est (une case fait 45 pixels) 
-		if (coord > 45 && coord < 90)
-			return 1;
-		else if (coord > 90 && coord < 135)
-			return 2;
-		else if (coord > 135 && coord < 180)
-			return 3;
-		else if (coord > 180 && coord < 225)
-			return 4;
-		else if (coord > 225 && coord < 270)
-			return 5;
-		else if (coord > 270 && coord < 315)
-			return 6;
-		else if (coord > 315 && coord < 360)
-			return 7;
-		else if (coord > 360 && coord < 405)
-			return 8;
-		else if (coord > 405 && coord < 450)
-			return 9;
-		else if (coord > 450 && coord < 495)
-			return 10;
-		else return 0;
 	}
 
 	/**
@@ -521,6 +489,8 @@ public class StartingState extends State {
 						//Crée l'état changement de joueur, car sinon le dernier voit le jeu du premier
 						stateManager.setCurrentState(new ChangingState(stateManager));
 					}else{
+						stateManager.setCurrent(stateManager.getCore().getPlayers().get(1));
+						stateManager.setOpponent(stateManager.getCore().getPlayers().get(0));
 						stateManager.setCurrentState(new PlayState(stateManager));
 					}
 				}
