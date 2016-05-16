@@ -7,6 +7,12 @@ import java.awt.geom.Rectangle2D;
 import java.awt.Color;
 import java.awt.Font;
 
+/**
+ * @file src/gui/TextButton.java
+ * @author cchaine
+ *
+ * @brief Classe bouton de texte
+ */
 public class TextButton {
 
 	int x, y;
@@ -18,6 +24,16 @@ public class TextButton {
 	boolean isPressed = false;
 	boolean isHovered = false;
 
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param x		Position x
+	 * @param y		Position y
+	 * @param normal		La chaine de caractère normale
+	 * @param hovered		La chaine de caractère quand la souris est sur le bouton
+	 * @param pressed		La chaine de caractère quand la souris appuie sur le bouton
+	 * @param font		La police du bouton
+	 */
 	public TextButton(int x, int y, String normal, String hovered, Color pressed, Font font) {
 		this.normal = normal;
 		this.hovered = hovered;
@@ -26,10 +42,23 @@ public class TextButton {
 		bounds = new Rectangle(x, y, 0, 0);
 	}
 
+	/**
+	 * @brief Verifie si la souris est dans le bouton
+	 * 
+	 * @param mouseX		La position de la souris
+	 * @param mouseY		La position de la souris
+	 * @return	VRAI	Si la souris est dans le bouton
+	 * @return	FAUX	Si la souris n'est pas dans le bouton
+	 */
 	public boolean contains(int x, int y) {
 		return bounds.contains(x, y);
 	}
 
+	/**
+	 * @brief Appelée par l'état dans la fonction render
+	 * 
+	 * @param g		L'objet outil de dessin
+	 */
 	public void render(Graphics g, float buttonAlpha) {
 		if (bounds.getWidth() == 0) {
 			g.setFont(font);
@@ -49,6 +78,12 @@ public class TextButton {
 			g.drawString(normal, (int)bounds.getX(), (int)(bounds.getY() + bounds.getHeight() / 2 - 10));
 	}
 	
+	/**
+	 * @brief Gestion des évènement souris est appuyée
+	 * 
+	 * @param mouseX		La position x de la souris
+	 * @param mouseY		La position y de la souris
+	 */
 	public void mousePressed(int mouseX, int mouseY)
 	{
 		if (bounds.contains(mouseX, mouseY))
@@ -57,6 +92,12 @@ public class TextButton {
 			isPressed = false;
 	}
 	
+	/**
+	 * @brief Gestion des évènement souris relachée
+	 * 
+	 * @param mouseX		La position x de la souris
+	 * @param mouseY		La position y de la souris
+	 */
 	public boolean mouseReleased(int mouseX, int mouseY)
 	{
 		isPressed = false;

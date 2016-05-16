@@ -5,11 +5,15 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 import core.BoatType;
 import utils.AssetLoader;
 
+/**
+ * @file src/gui/BoatButton.java
+ * @author cchaine
+ *
+ * @brief Classe bouton bateau, de l'étape StartingState
+ */
 public class BoatButton {
 
 	Rectangle2D bounds;
@@ -21,12 +25,27 @@ public class BoatButton {
 	
 	BoatType type;
 
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param x		Position x
+	 * @param y		Position y
+	 * @param type		Le type de bateau
+	 */
 	public BoatButton(int x, int y, BoatType type) {
+		//Le rectangle du bouton
 		bounds = new Rectangle(x, y, 44 * type.getSize(), 40);
-		
 		this.type = type;
 	}
 
+	/**
+	 * @brief Verifie si la souris est dans le bouton
+	 * 
+	 * @param mouseX		La position de la souris
+	 * @param mouseY		La position de la souris
+	 * @return	VRAI	Si la souris est dans le bouton
+	 * @return	FAUX	Si la souris n'est pas dans le bouton
+	 */
 	public boolean contains(int mouseX, int mouseY) {
 		if(textBound != null)
 			return bounds.contains(mouseX, mouseY) || textBound.contains(mouseX, mouseY);
@@ -34,6 +53,12 @@ public class BoatButton {
 			return false;
 	}
 	
+	/**
+	 * @brief Appelée par l'état dans la fonction update
+	 * 
+	 * @param mouseX		La position de la souris x
+	 * @param mouseY		La position de la souris y
+	 */
 	public void update(int mouseX, int mouseY)
 	{
 		//On verifie si la position de la souris est dans le bouton
@@ -43,6 +68,11 @@ public class BoatButton {
 			hovered = false;
 	}
 
+	/**
+	 * @brief Appelée par l'état dans la fonction render
+	 * 
+	 * @param g		L'objet outil de dessin
+	 */
 	public void render(Graphics g) {
 		if (used) {
 			g.setColor(new Color(150, 185, 252, 255));
@@ -53,6 +83,7 @@ public class BoatButton {
 		}else {
 			g.setColor(new Color(0, 35, 102, 255));
 		}
+		
 		g.fillRect((int)bounds.getX(), (int)(bounds.getY() - bounds.getHeight() /2) , (int)bounds.getWidth(), (int)bounds.getHeight());
 		
 		g.setFont(AssetLoader.helvetica25);
@@ -63,6 +94,12 @@ public class BoatButton {
 		g.drawString(type.toString(), (int)textBound.getX(), (int)textBound.getY());
 	}
 	
+	/**
+	 * @brief Gestion des évènement souris relachée
+	 * 
+	 * @param mouseX		La position x de la souris
+	 * @param mouseY		La position y de la souris
+	 */
 	public void mouseReleased(int mouseX, int mouseY)
 	{
 		if (bounds.contains(mouseX, mouseY) && !used)
