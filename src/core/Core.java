@@ -22,7 +22,7 @@ public class Core implements Runnable{
 	
 	private StateManager stateManager;
 	
-	private static final int TARGET_FPS = 30;
+	private static final int TARGET_FPS = 60;
 	private static final int TARGET_UPS = 30;
 	private Timer timer;
 	

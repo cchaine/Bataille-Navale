@@ -7,6 +7,12 @@ import java.awt.geom.Rectangle2D;
 
 import utils.AssetLoader;
 
+/**
+ * @file src/gui/TextField.java
+ * @author cchaine
+ *
+ * @brief Classe champ de texte
+ */
 public class TextField {
 
 	private String currentText;
@@ -14,12 +20,25 @@ public class TextField {
 	private boolean hovered = false;
 	private Rectangle2D bounds;
 	
+	/**
+	 * @brief Constructeur
+	 * 
+	 * @param x		Position x
+	 * @param y		Position y
+	 * @param width		Longueur
+	 * @param height		Largeur
+	 */
 	public TextField(int x, int y, int width, int height)
 	{
 		currentText = "Entrez votre nom...";
 		bounds = new Rectangle(x, y, width, height);
 	}
 	
+	/**
+	 * @brief Appelée par l'état dans la fonction render
+	 * 
+	 * @param g		L'objet outil de dessin
+	 */
 	public void render(Graphics g)
 	{
 		g.setFont(AssetLoader.helvetica45);
@@ -40,6 +59,12 @@ public class TextField {
 		g.drawString(currentText, (int)bounds.getX() + 2, (int)bounds.getY() + 78 - 24);
 	}
 	
+	/**
+	 * @brief Gestion des évènement souris est appuyée
+	 * 
+	 * @param mouseX		La position x de la souris
+	 * @param mouseY		La position y de la souris
+	 */
 	public void mousePressed(int mouseX, int mouseY)
 	{
 		if (bounds.contains(mouseX, mouseY)){
@@ -52,6 +77,14 @@ public class TextField {
 			active = false;
 	}
 	
+	/**
+	 * @brief Verifie si la souris est dans le bouton
+	 * 
+	 * @param mouseX		La position de la souris
+	 * @param mouseY		La position de la souris
+	 * @return	VRAI	Si la souris est dans le bouton
+	 * @return	FAUX	Si la souris n'est pas dans le bouton
+	 */
 	public boolean contains(int x, int y) {
 		return bounds.contains(x, y);
 	}
@@ -87,11 +120,18 @@ public class TextField {
 		return currentText.isEmpty();
 	}
 	
+	/**
+	 * @brief Efface la derniere lettre
+	 */
 	public void backspace()
 	{
 		currentText = currentText.substring(0, currentText.length() - 1);
 	}
 	
+	/**
+	 * @brief Ajoute une lettre
+	 * @param c		La lettre à ajouter
+	 */
 	public void addLetter(char c)
 	{
 		currentText += c;
